@@ -210,7 +210,7 @@ conn.commit()
 conn.close()
 
 
-api_key = 'ddfbd71a6d0caa560e3a1f793b91aa5f'
+api_key = 'your_api_key_here'
 
 def fetch_movie_poster(movie_title):
     """Fetch movie poster URL from TMDb API based on movie title."""
