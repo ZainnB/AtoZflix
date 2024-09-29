@@ -3,6 +3,7 @@ import sqlite3
 import pandas as pd
 import json
 import ast
+import requests
 
 app = Flask(__name__)
 
@@ -209,15 +210,68 @@ conn.commit()
 conn.close()
 
 
+api_key = 'ddfbd71a6d0caa560e3a1f793b91aa5f'
+
+def fetch_movie_poster(movie_title):
+    """Fetch movie poster URL from TMDb API based on movie title."""
+    try:
+        url = f"https://api.themoviedb.org/3/search/movie?api_key={api_key}&query={movie_title}"
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an exception for HTTP errors
+        data = response.json()
+        
+        if data['results']:
+            poster_path = data['results'][0]['poster_path']
+            full_poster_url = f"https://image.tmdb.org/t/p/w500{poster_path}"
+            return full_poster_url
+        else:
+            return None
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching poster for {movie_title}: {e}")
+        return None
+
+
+def update_posters_for_movies():
+    conn = sqlite3.connect('movies.db')
+    cursor = conn.cursor()
+
+    # Fetch titles starting from the specific title
+    cursor.execute('''
+        SELECT title FROM Movies
+        WHERE Poster_URL = 'Poster is not available'
+    ''')
+    
+    movies_to_update = cursor.fetchall()
+    
+    # Update poster URLs for the fetched movies
+    for movie in movies_to_update:
+        title = movie[0]
+        poster_url = fetch_movie_poster(title)
+        
+        if poster_url:  # Only update if a valid poster URL is returned
+            cursor.execute('''
+                UPDATE Movies
+                SET Poster_URL = ?
+                WHERE title = ?;
+            ''', (poster_url, title))
+            print(f"Updated poster for: {title}")
+            conn.commit()
+        else:
+            print(f"Poster not found for: {title}")
+
+    
+    conn.close()   # Close the connection
+
+
 @app.route('/')
 def home():
     return 'Welcome to the Movies API!'
 
-@app.route('/genres')
+@app.route('/movies')
 def crew():
     conn = sqlite3.connect('movies.db')
     cursor = conn.cursor()
-    cursor.execute('SELECT * FROM Genres LIMIT 10;')
+    cursor.execute('SELECT * FROM Movies LIMIT 10;')
     genres = cursor.fetchall()
     conn.close()
     return jsonify(genres)
