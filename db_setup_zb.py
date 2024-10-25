@@ -116,60 +116,39 @@ for index, row in merged_data.iterrows():
 
 conn.commit()
 
-#Cast Table
 cursor.execute('''
-            CREATE TABLE IF NOT EXISTS Cast (
-                cast_id INT PRIMARY KEY,
-                movie_id INT NOT NULL,
-                actor_name VARCHAR(255) NOT NULL,
-                character_name VARCHAR(255) NOT NULL,
-                FOREIGN KEY (movie_id) REFERENCES Movies(movie_id)
-);
-''')
-#inserting data into Cast table
-for index, row in merged_data.iterrows():
-    for i in row['cast']:
-        cursor.execute('''
-            INSERT OR REPLACE INTO Cast (cast_id, movie_id, actor_name, character_name)
-            VALUES (?,?,?,?);
-        ''', (i['id'], row['movie_id'], i['name'], i['character']))
+                CREATE TABLE IF NOT EXISTS Genres(
+                    genre_id INT PRIMARY KEY,
+                    genre_name VARCHAR(255) NOT NULL UNIQUE
+                )
+            ''')
 
-#Crew Table
+# Create a new table Movies_Genres
 cursor.execute('''
-            CREATE TABLE IF NOT EXISTS Crew (
-                crew_id INT PRIMARY KEY,
-                movie_id INT NOT NULL,
-                crew_name VARCHAR(255) NOT NULL,
-                job_title VARCHAR(255) NOT NULL,
-                FOREIGN KEY (movie_id) REFERENCES Movies(movie_id)
-);
-''')
+                CREATE TABLE IF NOT EXISTS Movies_Genres(
+                    movie_id INT,
+                    genre_id INT,
+                    PRIMARY KEY (movie_id, genre_id),
+                    FOREIGN KEY (movie_id) REFERENCES Movies(movie_id),
+                    FOREIGN KEY (genre_id) REFERENCES Genres(genre_id)
+                )
+            ''')
 
-#inserting data into Crew table
+# Populate the Genres table
 for index, row in merged_data.iterrows():
-    for i in row['crew']:
+    for genre in row['genres']:
         cursor.execute('''
-            INSERT OR REPLACE INTO Crew (crew_id, movie_id, crew_name, job_title)
-            VALUES (?,?,?,?);
-        ''', (i['id'], row['movie_id'], i['name'], i['job']))
+            INSERT OR IGNORE INTO Genres (genre_id, genre_name)
+            VALUES (?, ?)
+        ''', (genre['id'], genre['name']))
 
-#Genre Table
-cursor.execute('''
-            CREATE TABLE IF NOT EXISTS Genres (
-                genre_id INT PRIMARY KEY,
-                movie_id INT NOT NULL,
-                genre_name VARCHAR(255) NOT NULL,
-                FOREIGN KEY (movie_id) REFERENCES Movies(movie_id)
-);
-''')
-
-#inserting data into Genres table
+#populate the Movies_Genres table
 for index, row in merged_data.iterrows():
-    for i in row['genres']:
+    for genre in row['genres']:
         cursor.execute('''
-            INSERT OR REPLACE INTO Genres (genre_id, movie_id, genre_name)
-            VALUES (?,?,?);
-        ''', (i['id'], row['movie_id'], i['name']))
+            INSERT OR IGNORE INTO Movies_Genres (movie_id, genre_id)
+            VALUES (?, ?)
+        ''', (row['movie_id'], genre['id']))
 
 #user Table
 cursor.execute('''
@@ -206,6 +185,8 @@ cursor.execute('''
 );
 ''')
 
+
+# Commit the changes and close the connection
 conn.commit()
 conn.close()
 
