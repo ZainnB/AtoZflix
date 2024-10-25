@@ -150,6 +150,78 @@ for index, row in merged_data.iterrows():
             VALUES (?, ?)
         ''', (row['movie_id'], genre['id']))
 
+# Create a new table Actors
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS Actors (
+    actor_id INTEGER PRIMARY KEY,
+    actor_name VARCHAR(255) NOT NULL,
+    character_name VARCHAR(255) NOT NULL
+    )
+''')
+
+#populating the Actors table
+for index, row in merged_data.iterrows():
+    for actor in row['cast']:
+        cursor.execute('''
+        INSERT OR IGNORE INTO Actors (actor_id, actor_name, character_name)
+        VALUES (?, ?, ?)
+        ''', (actor['id'], actor['name'], actor['character']))
+
+# Create a new table Movies_Actors
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS Movies_Actors (
+    movie_id INT,
+    actor_id INT,
+    PRIMARY KEY (movie_id, actor_id)
+    FOREIGN KEY (movie_id) REFERENCES Movies(movie_id),
+    FOREIGN KEY (actor_id) REFERENCES Actors(actor_id)
+    )
+''')
+
+#populating the Movies_Actors table
+for index, row in merged_data.iterrows():
+    for actor in row['cast']:
+        cursor.execute('''
+        INSERT OR IGNORE INTO Movies_Actors (movie_id, actor_id)
+        VALUES (?, ?)
+        ''', (row['movie_id'], actor['id']))
+
+# Create a new table Crew
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS Crew (
+    crew_id INTEGER PRIMARY KEY,
+    crew_name VARCHAR(255) NOT NULL,
+    job_title VARCHAR(255) NOT NULL
+)
+''')
+
+#populating the Crew table
+for index, row in merged_data.iterrows():
+    for crew in row['crew']:
+        cursor.execute('''
+        INSERT OR IGNORE INTO Crew (crew_id, crew_name, job_title)
+        VALUES (?, ?, ?)
+        ''', (crew['id'], crew['name'], crew['job']))
+
+# Create a new table Movies_Crew
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS Movies_Crew (
+    movie_id INT,
+    crew_id INT,
+    PRIMARY KEY (movie_id, crew_id),
+    FOREIGN KEY (movie_id) REFERENCES Movies(movie_id),
+    FOREIGN KEY (crew_id) REFERENCES Crew(crew_id)
+    )
+''')
+
+#populating the Movies_Crew table
+for index, row in merged_data.iterrows():
+    for crew in row['crew']:
+        cursor.execute('''
+        INSERT OR IGNORE INTO Movies_Crew (movie_id, crew_id)
+        VALUES (?, ?)
+        ''', (row['movie_id'], crew['id']))
+
 #user Table
 cursor.execute('''
             CREATE TABLE IF NOT EXISTS Users (
