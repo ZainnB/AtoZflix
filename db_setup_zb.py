@@ -246,16 +246,16 @@ cursor.execute('''
 );
 ''')
 
-#wishlist Table
-cursor.execute('''
-            CREATE TABLE IF NOT EXISTS Watchlist (
-                watchlist_id INT PRIMARY KEY,
-                user_id INT NOT NULL,
-                movie_id INT NOT NULL,
-                FOREIGN KEY (user_id) REFERENCES Users(user_id),
-                FOREIGN KEY (movie_id) REFERENCES Movies(movie_id)
-);
-''')
+#Watchlist Table
+cursor.execute("""
+               CREATE TABLE Watchlist(
+               movie_id INT,
+               user_id INT,
+                PRIMARY KEY(movie_id, user_id),
+                FOREIGN KEY(movie_id) REFERENCES Movies(movie_id),
+                FOREIGN KEY(user_id) REFERENCES Users(user_id)
+                )
+                """)
 
 
 # Commit the changes and close the connection
