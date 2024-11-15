@@ -246,16 +246,42 @@ cursor.execute('''
 );
 ''')
 
-#Watchlist Table
-cursor.execute("""
-               CREATE TABLE Watchlist(
-               movie_id INT,
-               user_id INT,
+#WatchHistory Table
+cursor.execute('''
+            CREATE TABLE IF NOT EXISTS WatchHistory (
+                movie_id INT,
+                user_id INT,
+                watch_date DATE DEFAULT CURRENT_DATE,
+                rating_id
                 PRIMARY KEY(movie_id, user_id),
                 FOREIGN KEY(movie_id) REFERENCES Movies(movie_id),
                 FOREIGN KEY(user_id) REFERENCES Users(user_id)
-                )
-                """)
+            )
+''')
+
+cursor.execute('''DROP TABLE IF EXISTS Watchlist''')
+
+cursor.execute('''
+            CREATE TABLE IF NOT EXISTS Watchlists (
+                watchlist_id INT PRIMARY KEY AUTO_INCREMENT,  
+                user_id INT NOT NULL,
+                watchlist_num INT NOT NULL,  
+                watchlist_name VARCHAR(255) NOT NULL,
+                created_at DATE DEFAULT CURRENT_DATE,
+                FOREIGN KEY (user_id) REFERENCES Users(user_id),
+                UNIQUE (user_id, watchlist_num) 
+            )
+''')
+               
+cursor.execute('''
+            CREATE TABLE IF NOT EXISTS Watchlist_Movies (
+                watchlist_id INT,
+                movie_id INT,
+                PRIMARY KEY (watchlist_id, movie_id),
+                FOREIGN KEY (watchlist_id) REFERENCES Watchlists(watchlist_id),
+                FOREIGN KEY (movie_id) REFERENCES Movies(movie_id)
+               )
+''')
 
 
 # Commit the changes and close the connection
