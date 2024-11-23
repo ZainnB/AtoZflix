@@ -3,6 +3,7 @@ from flask_cors import CORS
 import sqlite3
 import re
 import bcrypt
+import json
 
 app = Flask(__name__)
 CORS(app)
@@ -265,6 +266,84 @@ def search_movies():
         print(f"Error fetching search movies: {e}")
         return jsonify({"error": "Failed to fetch search movies"}), 500
     
+def get_top_actors_with_movies(top_n):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # SQLite query to fetch top actors and their movies
+    query = """
+    WITH ActorRatings AS (
+        SELECT
+            a.actor_id,
+            a.actor_name,
+            SUM(m.rating_avg) AS total_rating
+        FROM
+            Actors a
+        JOIN Movies_Actors ma ON a.actor_id = ma.actor_id
+        JOIN Movies m ON ma.movie_id = m.movie_id
+        GROUP BY a.actor_id, a.actor_name
+    ),
+    TopActors AS (
+        SELECT
+            actor_id,
+            actor_name,
+            total_rating
+        FROM ActorRatings
+        ORDER BY total_rating DESC
+        LIMIT ?
+    ),
+    ActorMovies AS (
+        SELECT
+            a.actor_id,
+            m.movie_id,
+            m.poster_path,
+            m.rating_avg
+        FROM
+            Movies m
+        JOIN Movies_Actors ma ON m.movie_id = ma.movie_id
+        JOIN TopActors a ON ma.actor_id = a.actor_id
+        ORDER BY a.actor_id, m.rating_avg DESC
+    )
+    SELECT
+        a.actor_id,
+        a.actor_name,
+        JSON_GROUP_ARRAY(
+            JSON_OBJECT('movie_id', am.movie_id, 'poster_path', am.poster_path)
+        ) AS top_movies
+    FROM
+        TopActors a
+    JOIN
+        ActorMovies am ON a.actor_id = am.actor_id
+    GROUP BY
+        a.actor_id, a.actor_name;
+    """
+    
+    cursor.execute(query, (top_n,))
+    results = cursor.fetchall()
+    conn.close()
+    
+    # Format response
+    actors_with_movies = []
+    for actor_id, actor_name, top_movies in results:
+        actors_with_movies.append({
+            "actor_id": actor_id,
+            "actor_name": actor_name,
+            "top_movies": json.loads(top_movies)  # Parse JSON from SQLite result
+        })
+    return actors_with_movies
+
+@app.route('/api/top-actors', methods=['GET'])
+def get_top_actors():
+    try:
+        # Get the number of top actors from request parameters (default: 5)
+        top_n = int(request.args.get('top_n', 5))
+        
+        # Replace with your database path
+        actors_with_movies = get_top_actors_with_movies(top_n)
+        
+        return jsonify({"status": "success", "data": actors_with_movies}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 
 @app.route("/api/movie_details", methods=["GET"])
