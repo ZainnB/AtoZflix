@@ -39,7 +39,7 @@
   
   <div class="latest-movies">
     <div class="slider-header">
-      <h2>Latest Movies</h2>
+      <h2>{heading}</h2>
       <button class="view-all-btn">View All</button>
     </div>
   

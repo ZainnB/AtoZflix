@@ -1,7 +1,7 @@
 <script>
     export let open = false;
-    let items = ["Home", "Genre", "Country", "Movies", "TV Series", "Top IMDB", "Favorites"];
-    let itemlink = ["#", "#", "#", "#", "#", "#", "#"];
+    let items = ["Home", "Genre", "Top Rated", "Favourites", "To Watch Later", "Actors", "Crew"];
+    let itemlink = ["Home", "Genre", "TopRated", "Favourites", "ToWatchLater", "Actors", "Crew"];
     let pairedArray = items.map((item, index) => ({ sidebarElement: item, link: itemlink[index] }));
   
     const closeSideBar = () => {
@@ -12,7 +12,7 @@
   <aside class:open={open}>
     <button on:click={closeSideBar}>Close</button>
     {#each pairedArray as {sidebarElement, link}}
-      <a href={link}>{sidebarElement}</a>
+      <a href={`../components/${link}`}>{sidebarElement}</a>
     {/each}
   </aside>
   

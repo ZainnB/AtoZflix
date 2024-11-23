@@ -216,7 +216,7 @@ def genre_movies():
     if genre_id:
         # Now fetch movies for the given genre_id
         query = """
-        SELECT m.poster_path
+        SELECT m.poster_path,m.movie_id
         FROM Movies m
         JOIN Movies_Genres mg ON m.movie_id = mg.movie_id
         WHERE mg.genre_id = ?
@@ -227,7 +227,8 @@ def genre_movies():
             movies = cursor.fetchall()
             conn.close()
             formatted_movies = [
-                {"poster_path": movie[0]} for movie in movies
+                {"poster_path": movie[0],
+                 "movie_id": movie[1]} for movie in movies
             ]
             return jsonify({"movies": formatted_movies}), 200
         except Exception as e:
@@ -308,6 +309,26 @@ def movie_details():
     except Exception as e:
         print(f"Error fetching movie details: {e}")
         return jsonify({"error": "Failed to fetch movie details"}), 500
+
+@app.route('/api/get_genre_names')
+def get_all_genre():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    query = """SELECT DISTINCT genre_name FROM Genres"""
+    try:
+        cursor.execute(query)
+        genres = cursor.fetchall()
+        
+        # Flatten the list of tuples to a list of strings
+        genre_names = [genre[0] for genre in genres]
+        
+        return jsonify({"genres": genre_names}), 200
+    except Exception as e:
+        print(f"Error fetching genre details: {e}")
+        return jsonify({"error": "Failed to fetch genre details"}), 500
+    finally:
+        cursor.close()
+        conn.close()
 
 @app.route('/')
 def home():
