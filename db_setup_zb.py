@@ -160,7 +160,7 @@ cursor.execute('''
 conn.commit()
 conn.close()
 
-API_KEY = 'your_api_key_here'
+API_KEY = 'ddfbd71a6d0caa560e3a1f793b91aa5f'
 BASE_URL = "https://api.themoviedb.org/3"
 
 def fetch_with_retry(url, params, retries=3, backoff_factor=1):
@@ -267,10 +267,10 @@ def main():
     cursor = conn.cursor()
     
     total_movies_populated = 0
-    total_pages = 100  # You can increase or decrease this based on the desired movie count
+    total_pages = 2  # You can increase or decrease this based on the desired movie count
 
     for year_start, year_end in [(1970, 2024)]:
-        for page in range(51, total_pages + 1):  # Fetch multiple pages (250 pages for 5000+ movies)
+        for page in range(1, total_pages + 1):  # Fetch multiple pages (250 pages for 5000+ movies)
             movies = fetch_movies(year_start, year_end, page).get('results', [])
             print(f"Fetched {len(movies)} movies for page {page} ({year_start}-{year_end}).")
             for movie in movies:
@@ -307,5 +307,4 @@ def crew():
     return jsonify(genres)
 
 if __name__ == '__main__':
-    main()
-    #app.run(debug=True)
+    app.run(debug=True)
