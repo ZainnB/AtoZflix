@@ -4,7 +4,8 @@
     import SideBar from "./SideBar.svelte";
     import TrendingMovies from "./Top5big.svelte";
     import Top15Medium from "./Top15medium.svelte";
-    import LatestMovies from "./latest_small.svelte";
+    import Slider from "../Slider/+page.svelte";
+    import GenreSlider from "../GenreSlider/+page.svelte"
 
     let sidebar = false;
 
@@ -16,10 +17,10 @@
 
     <div class="wrapper">
         <div class="navbar-wrapper">
-            <SideBar bind:open={sidebar} />
+            
             <Navbar bind:isSidebarOpen={sidebar} />
         </div>
-
+        <SideBar bind:open={sidebar} />
         <!-- Movies Section -->
         <div class="movies-wrapper">
             <TrendingMovies />
@@ -28,7 +29,13 @@
             <Top15Medium />
         </div>
         <div class="latest-movies-wrapper">
-            <LatestMovies />
+            <Slider heading={"Latest Movies"} api={"latest"} limit={30}/>
+        </div>
+        <div class="latest-movies-wrapper">
+            <Slider heading={"Top Rated Movies"} api={"top_rated"} limit={20}/>
+        </div>
+        <div class="latest-movies-wrapper">
+            <GenreSlider heading={"Laugh out Loud"} limit={10} genre={"Comedy"} />
         </div>
 
     </div>
@@ -40,6 +47,7 @@
         position: relative;
         min-height: 100vh;
         overflow: hidden;
+        background-color:black
     }
 
     .navbar-wrapper {
@@ -56,13 +64,14 @@
     }
 
     .top15-wrapper {
-        padding: 0 1rem;
         z-index: 1;
     }
 
     .latest-movies-wrapper {
-        padding: 2rem 1rem;
         z-index: 1;
         margin-top: 2rem;
+    }
+    *{
+        padding:0px;
     }
 </style>
