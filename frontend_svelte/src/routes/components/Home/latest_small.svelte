@@ -50,7 +50,14 @@
                     <div
                         class="movie-poster"
                         style="background-image: url(https://image.tmdb.org/t/p/w500{movie.poster_path})"
-                    ></div>
+                    >
+                        {#if !movie.poster_path}
+                            <p class="fallback-text">Poster not available</p>
+                        {/if}
+                    </div>
+                    <script>
+                      console.log("Poster Path:", movie.poster_path);
+                    </script>
                 </div>
             {/each}
         </div>
@@ -63,7 +70,7 @@
     .latest-movies {
         width: 100%;
         margin: 2rem 0;
-        color: white;
+        color: rgb(0, 0, 0);
     }
 
     .slider-header {
@@ -121,6 +128,14 @@
         background-size: cover;
         background-position: center;
         position: relative;
+        background-color: #121212;
+    }
+
+    .fallback-text {
+        color: white;
+        font-size: 0.9rem;
+        text-align: center;
+        padding: 1rem;
     }
 
     .slider-btn {

@@ -159,13 +159,42 @@ def latest_movies():
         cursor.execute(query, (limit,))
         movies = cursor.fetchall()
         conn.close()
-        
-        return jsonify({"movies": movies})
+        formatted_movies = [
+            {"poster_path": movie[0]} for movie in movies
+        ]
+        return jsonify({"movies": formatted_movies}), 200
     
     except Exception as e:
         print(f"Error fetching latest movies: {e}")
         return jsonify({"error": "Failed to fetch latest movies"}), 500
-
+    
+@app.route("/api/top_rated", methods=["GET"])
+def top_rated_movies():
+    limit = request.args.get("limit", default=10, type=int)
+    conn = sqlite3.connect('movies.db')
+    cursor = conn.cursor()
+    # Query to fetch top rated movies
+    query = """
+    SELECT m.poster_path
+    FROM Movies m
+    ORDER BY m.rating_avg DESC
+    LIMIT ?
+    """
+    
+    try:
+        # Execute query with limit
+        cursor.execute(query, (limit,))
+        movies = cursor.fetchall()
+        conn.close()
+        formatted_movies = [
+            {"poster_path": movie[0]} for movie in movies
+        ]
+        return jsonify({"movies": formatted_movies}), 200
+    
+    except Exception as e:
+        print(f"Error fetching top rated movies: {e}")
+        return jsonify({"error": "Failed to fetch top rated movies"}), 500
+    
 
 @app.route("/api/genre", methods=["GET"])
 def genre_movies():
@@ -197,14 +226,88 @@ def genre_movies():
             cursor.execute(query, (genre_id[0], limit))
             movies = cursor.fetchall()
             conn.close()
-            return jsonify({"movies": movies})
+            formatted_movies = [
+                {"poster_path": movie[0]} for movie in movies
+            ]
+            return jsonify({"movies": formatted_movies}), 200
         except Exception as e:
             print(f"Error fetching genre movies: {e}")
             return jsonify({"error": "Failed to fetch genre movies"}), 500
     else:
         return jsonify({"error": "Genre not found"}), 404
+
+
+@app.route("/api/search_movie", methods=["GET"])
+def search_movies():
+    query = request.args.get("query", type=str)
+    limit = request.args.get("limit", default=10, type=int)
+    
+    # Fetch movies that match the search query
+    conn = sqlite3.connect('movies.db')
+    cursor = conn.cursor()
+    query = """
+    SELECT m.poster_path
+    FROM Movies m
+    WHERE m.title LIKE ?
+    LIMIT ?
+    """
+    
+    try:
+        cursor.execute(query, (f"%{query}%", limit))
+        movies = cursor.fetchall()
+        conn.close()
+        formatted_movies = [
+            {"poster_path": movie[0]} for movie in movies
+        ]
+        return jsonify({"movies": formatted_movies}), 200
+    except Exception as e:
+        print(f"Error fetching search movies: {e}")
+        return jsonify({"error": "Failed to fetch search movies"}), 500
     
 
+
+@app.route("/api/movie_details", methods=["GET"])
+def movie_details():
+    movie_id = request.args.get("movie_id", type=int)
+    
+    # Fetch movie details for the given movie_id
+    conn = sqlite3.connect('movies.db')
+    cursor = conn.cursor()
+    query = """
+    SELECT m.title, m.original_title, m.release_date, m.budget, m.revenue, m.runtime, m.overview, m.production_companies, 
+           m.production_countries, m.rating_avg, m.rating_count, m.country, m.poster_path, m.backdrop_path, m.adult 
+    FROM Movies m
+    WHERE m.movie_id = ?
+    """
+    
+    try:
+        cursor.execute(query, (movie_id,))
+        movie = cursor.fetchone()
+        conn.close()
+        if movie:
+            formatted_movie = {
+                "title": movie[0],
+                "original_title": movie[1],
+                "release_date": movie[2],
+                "budget": movie[3],
+                "revenue": movie[4],
+                "runtime": movie[5],
+                "overview": movie[6],
+                "production_companies": movie[7],
+                "production_countries": movie[8],
+                "rating_avg": movie[9],
+                "rating_count": movie[10],
+                "country": movie[11],
+                "poster_path": movie[12],
+                "backdrop_path": movie[13],
+                "adult": movie[14]
+            }
+            return jsonify({"movie": formatted_movie}), 200
+        else:
+            return jsonify({"error": "Movie not found"}), 404
+    except Exception as e:
+        print(f"Error fetching movie details: {e}")
+        return jsonify({"error": "Failed to fetch movie details"}), 500
 
 @app.route('/')
 def home():

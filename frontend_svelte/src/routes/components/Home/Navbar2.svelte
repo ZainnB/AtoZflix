@@ -1,9 +1,9 @@
 <script>
-  import { onMount } from 'svelte';
+  // import { onMount } from 'svelte';
   export let logo = "/assets/img/logo.png";
 
   let searchQuery = "";
-  let isSidebarOpen = false;
+  export let isSidebarOpen = false;
 
   const handleSearch = () => {
     console.log("Searching for:", searchQuery);
@@ -17,6 +17,7 @@
     console.log("User logged out");
     window.location.href = "/"; // Redirect to homepage or login
   };
+
 </script>
 
 <nav>
@@ -35,17 +36,6 @@
   </div>
 </nav>
 
-<div class="sidebar {isSidebarOpen ? 'sidebar-active' : ''}">
-  <ul>
-    <li><p>Home</p></li>
-    <li><p>Genre</p></li>
-    <li><p>Country</p></li>
-    <li><p>Movies</p></li>
-    <li><p>TV Series</p></li>
-    <li><p>Top IMDb</p></li>
-    <li><p>Favorites</p></li>
-  </ul>
-</div>
 
 <style>
   /* Navbar */
@@ -126,7 +116,7 @@
     color: #1abc9c; /* Hover effect for the hamburger icon */
   }
 
-  /* Sidebar */
+  /* Sidebar
   .sidebar {
     position: fixed;
     top: 0;
@@ -166,14 +156,14 @@
 
   .sidebar ul li p:hover {
     background-color: rgba(26, 188, 156, 0.5); /* Hover effect for list items */
-  }
+  /* } */
 
   /* Sidebar Transition */
-  .sidebar {
+  /* .sidebar {
     transform: translateX(-100%);
   }
 
   .sidebar-active {
     transform: translateX(0); /* Move sidebar into view */
-  }
+  /* } */
 </style>
