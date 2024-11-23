@@ -307,4 +307,5 @@ def crew():
     return jsonify(genres)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    main()
+    #app.run(debug=True)
