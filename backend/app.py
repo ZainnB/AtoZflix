@@ -99,7 +99,8 @@ def calculate_trending(limit):
         M.overview, 
         M.rating_avg, 
         M.runtime, 
-        M.release_date, 
+        M.release_date,
+        M.movie_id, 
         GROUP_CONCAT(G.genre_name, ', ') AS genres
         FROM Movies M
         LEFT JOIN Movies_Genres MG ON M.movie_id = MG.movie_id
@@ -125,7 +126,8 @@ def calculate_trending(limit):
             "rating": movie[3],
             "duration": movie[4],
             "release_date": movie[5],
-            "genres": movie[6]
+            "genres": movie[6],
+            "movie_id": movie[7]
         }
         for movie in movies
     ]
@@ -149,7 +151,7 @@ def latest_movies():
     cursor = conn.cursor()
     # Query to fetch the latest movies
     query = """
-    SELECT m.poster_path
+    SELECT m.poster_path, m.movie_id
     FROM Movies m
     ORDER BY m.release_date DESC
     LIMIT ?
@@ -161,7 +163,9 @@ def latest_movies():
         movies = cursor.fetchall()
         conn.close()
         formatted_movies = [
-            {"poster_path": movie[0]} for movie in movies
+            {"poster_path": movie[0],
+             "movie_id" : movie[1]
+            } for movie in movies
         ]
         return jsonify({"movies": formatted_movies}), 200
     
@@ -176,7 +180,7 @@ def top_rated_movies():
     cursor = conn.cursor()
     # Query to fetch top rated movies
     query = """
-    SELECT m.poster_path
+    SELECT m.poster_path, m.movie_id
     FROM Movies m
     ORDER BY m.rating_avg DESC
     LIMIT ?
@@ -188,8 +192,10 @@ def top_rated_movies():
         movies = cursor.fetchall()
         conn.close()
         formatted_movies = [
-            {"poster_path": movie[0]} for movie in movies
-        ]
+            {"poster_path": movie[0],
+              "movie_id" : movie[1]
+            } for movie in movies
+            ]
         return jsonify({"movies": formatted_movies}), 200
     
     except Exception as e:
@@ -217,7 +223,11 @@ def genre_movies():
     if genre_id:
         # Now fetch movies for the given genre_id
         query = """
+<<<<<<< Updated upstream
         SELECT m.poster_path,m.movie_id
+=======
+        SELECT m.poster_path, m.movie_id
+>>>>>>> Stashed changes
         FROM Movies m
         JOIN Movies_Genres mg ON m.movie_id = mg.movie_id
         WHERE mg.genre_id = ?
@@ -229,7 +239,12 @@ def genre_movies():
             conn.close()
             formatted_movies = [
                 {"poster_path": movie[0],
+<<<<<<< Updated upstream
                  "movie_id": movie[1]} for movie in movies
+=======
+                 "movie_id" : movie[1]
+                } for movie in movies
+>>>>>>> Stashed changes
             ]
             return jsonify({"movies": formatted_movies}), 200
         except Exception as e:
@@ -241,28 +256,39 @@ def genre_movies():
 
 @app.route("/api/search_movie", methods=["GET"])
 def search_movies():
-    query = request.args.get("query", type=str)
+    # Extract parameters from the request
+    search_query = request.args.get("query", type=str)
     limit = request.args.get("limit", default=10, type=int)
-    
-    # Fetch movies that match the search query
+
+    # Database connection
     conn = sqlite3.connect('movies.db')
+    conn.row_factory = sqlite3.Row  # Allow dict-style access to rows
     cursor = conn.cursor()
-    query = """
-    SELECT m.poster_path
+
+    # SQL query to search for movies
+    sql_query = """
+    SELECT m.poster_path, m.movie_id
     FROM Movies m
-    WHERE m.title LIKE ?
+    WHERE m.title LIKE ? COLLATE NOCASE
     LIMIT ?
     """
-    
+
     try:
-        cursor.execute(query, (f"%{query}%", limit))
+        # Execute the query with the correct parameters
+        cursor.execute(sql_query, (f"%{search_query}%", limit))
         movies = cursor.fetchall()
         conn.close()
-        formatted_movies = [
-            {"poster_path": movie[0]} for movie in movies
-        ]
+
+        # Format the fetched results
+        formatted_movies = [{"poster_path": movie["poster_path"],
+                             "movie_id": movie["movie_id"]
+                            } for movie in movies]
+
         return jsonify({"movies": formatted_movies}), 200
+
     except Exception as e:
+        # Handle any errors and return an error response
+        conn.close()
         print(f"Error fetching search movies: {e}")
         return jsonify({"error": "Failed to fetch search movies"}), 500
     

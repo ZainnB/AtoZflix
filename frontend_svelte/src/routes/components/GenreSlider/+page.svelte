@@ -59,10 +59,10 @@
   <style>
     .latest-movies {
       width: 100%;
-      max-width: 1200px;
+      max-width: 1400px;
       margin: 1rem auto;
       color: #fff;
-      background-color: #141414; /* Netflix black background */
+      background-color: #121212; /* Netflix black background */
       padding: 1rem;
       border-radius: 10px;
     }

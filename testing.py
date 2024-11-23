@@ -265,7 +265,7 @@ app = Flask(__name__)
 def get_users():
     conn = sqlite3.connect('movies.db')
     cursor = conn.cursor()
-    cursor.execute('SELECT * FROM Movies LIMIT 10;')
+    cursor.execute('SELECT * FROM Movies WHERE Movies.title LIKE "Inception";')
     users = cursor.fetchall()
     conn.close()
     return jsonify(users)

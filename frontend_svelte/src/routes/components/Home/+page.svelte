@@ -6,6 +6,7 @@
     import Top15Medium from "./Top15medium.svelte";
     import Slider from "../Slider/+page.svelte";
     import GenreSlider from "../GenreSlider/+page.svelte"
+    import Footer from "../Register/Footer1.svelte";
 
     let sidebar = false;
 
@@ -39,6 +40,7 @@
         </div>
 
     </div>
+    <Footer />
 
 
 <style>
@@ -47,7 +49,7 @@
         position: relative;
         min-height: 100vh;
         overflow: hidden;
-        background-color:black
+        background-color: #121212
     }
 
     .navbar-wrapper {
