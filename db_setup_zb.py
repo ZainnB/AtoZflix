@@ -96,11 +96,7 @@ cursor.execute('''
 
 #user Table
 cursor.execute('''
-    DROP TABLE IF EXISTS Users;
-''')
-
-cursor.execute('''
-    CREATE TABLE Users (
+    CREATE TABLE IF NOT EXISTS Users (
         user_id INTEGER PRIMARY KEY AUTOINCREMENT,
         email VARCHAR(255) NOT NULL UNIQUE CHECK(email LIKE '%_@__%.__%'),
         username VARCHAR(255) NOT NULL,
@@ -114,7 +110,7 @@ cursor.execute('''
 #Ratings Table
 cursor.execute('''
             CREATE TABLE IF NOT EXISTS Ratings (
-                rating_id INT PRIMARY KEY,
+                rating_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INT NOT NULL,
                 movie_id INT NOT NULL,
                 rating INT NOT NULL CHECK(rating >= 0 AND rating <= 10),

@@ -21,8 +21,8 @@
 
     // Save credentials to localStorage
     localStorage.setItem("user", JSON.stringify({
-      username: usernameOrEmail,
-      token: data.token, // Assuming the backend sends a token
+      userId:data.user_id,
+      username: usernameOrEmail
     }));
 
     // Redirect to home

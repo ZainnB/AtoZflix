@@ -605,6 +605,30 @@ def movie_details():
 def home():
     return 'Welcome to the Movies API!'
 
+@app.route('/api/rate_movie', methods=['POST'])
+def rate_movie():
+    try:
+        data = request.get_json()
+        user_id = data.get('user_id')
+        movie_id = data.get('movie_id')
+        rating = data.get('rating')
+        review = data.get('review', '')
+        if not user_id or not movie_id or rating is None:
+            return jsonify({"status": "error", "message": "Missing required fields"}), 400
+        if not (0 <= rating <= 10):
+            return jsonify({"status": "error", "message": "Rating must be between 0 and 10"}), 400
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO Ratings (user_id, movie_id, rating, review)
+            VALUES (?, ?, ?, ?)
+        ''', (user_id, movie_id, rating, review))
+        conn.commit()
+        conn.close()
+        return jsonify({"status": "success", "message": "Rating added successfully"}), 201
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 @app.route('/api/get_all_users', methods=['GET'])
 def getAllUsers():
     try:
@@ -630,6 +654,49 @@ def getAllUsers():
 
     except Exception as e:
         # Handle errors
+        return jsonify({"status": "error", "message": str(e)}), 500
+@app.route('/api/get_all_ratings', methods=['GET'])
+def get_all_ratings():
+    try:
+        # Connect to the database
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # SQL query to get all ratings along with user and movie details
+        query = '''
+            SELECT r.rating_id, r.rating, r.review, r.user_id, r.movie_id, u.username, m.title AS movie_title
+            FROM Ratings r
+            JOIN Users u ON r.user_id = u.user_id
+            JOIN Movies m ON r.movie_id = m.movie_id
+        '''
+        
+        # Execute the query
+        cursor.execute(query)
+        ratings = cursor.fetchall()
+
+        # Check if ratings are found
+        if ratings:
+            # Convert ratings to a list of dictionaries
+            ratings_list = []
+            for row in ratings:
+                ratings_list.append({
+                    "rating_id": row["rating_id"],
+                    "rating": row["rating"],
+                    "review": row["review"],
+                    "user_id": row["user_id"],
+                    "username": row["username"],
+                    "movie_id": row["movie_id"],
+                    "movie_title": row["movie_title"]
+                })
+            
+            # Close the connection
+            conn.close()
+
+            return jsonify({"status": "success", "ratings": ratings_list}), 200
+        else:
+            return jsonify({"status": "success", "message": "No ratings found"}), 404
+    
+    except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
