@@ -7,6 +7,7 @@
     import Slider from "../Slider/+page.svelte";
     import GenreSlider from "../GenreSlider/+page.svelte"
     import Footer from "../Register/Footer1.svelte";
+    import Line from "../Register/Line.svelte";
 
     let sidebar = false;
 
@@ -18,10 +19,11 @@
 
     <div class="wrapper">
         <div class="navbar-wrapper">
-            
-            <Navbar bind:isSidebarOpen={sidebar} />
+            <Navbar/>
         </div>
-        <SideBar bind:open={sidebar} />
+        <div class = "sidebar-wrapper">
+            <SideBar bind:open={sidebar} />
+        </div>
         <!-- Movies Section -->
         <div class="movies-wrapper">
             <TrendingMovies />
@@ -40,6 +42,7 @@
         </div>
 
     </div>
+    <Line />
     <Footer />
 
 
@@ -60,6 +63,13 @@
         z-index: 10;
     }
 
+    .sidebar-wrapper {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+    }
+    
     .movies-wrapper {
         position: relative;
         z-index: 1;
@@ -71,7 +81,7 @@
 
     .latest-movies-wrapper {
         z-index: 1;
-        margin-top: 2rem;
+        margin-top: 1rem;
     }
     *{
         padding:0px;

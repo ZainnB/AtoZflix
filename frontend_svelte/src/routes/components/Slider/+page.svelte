@@ -48,7 +48,7 @@
   
       <div class="slider">
         {#each movies.slice(currentIndex, currentIndex + 8) as movie}
-          <MovieCard poster_path={movie.poster_path} />
+          <MovieCard poster_path={movie.poster_path} movie_id={movie.movie_id} />
         {/each}
       </div>
   
@@ -60,11 +60,11 @@
     .latest-movies {
       width: 100%;
       max-width: 1400px;
-      margin: 1rem auto;
+      margin: 0.2rem auto;
       color: #fff;
       background-color:  #121212; 
-      padding: 1rem;
-      border-radius: 10px;
+      padding: 0.2rem;
+      border-radius: 7px;
     }
   
     .slider-header {
@@ -82,7 +82,7 @@
   
     .view-all-btn {
       background-color: transparent;
-      color: #e50914; /* Netflix red */
+      color: #098577; 
       border: none;
       font-size: 0.9rem;
       cursor: pointer;
@@ -90,7 +90,7 @@
     }
   
     .view-all-btn:hover {
-      color: #f40612; /* Brighter red on hover */
+      color: #064e45; 
     }
   
     .slider-wrapper {

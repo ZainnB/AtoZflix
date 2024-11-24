@@ -3,7 +3,7 @@
   import Main from "./RegisterationForm.svelte";
   import FAQ from "./FAQ.svelte";
   import Footer from "./Footer1.svelte";
-  import Line from "./line.svelte";
+  import Line from "./Line.svelte";
 
   const faqQuestions = [
     {

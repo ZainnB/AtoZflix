@@ -3,14 +3,9 @@
   export let logo = "/assets/img/logo.png";
 
   let searchQuery = "";
-  export let isSidebarOpen = false;
 
   const handleSearch = () => {
     console.log("Searching for:", searchQuery);
-  };
-
-  const toggleSidebar = () => {
-    isSidebarOpen = !isSidebarOpen;
   };
 
   const handleLogout = () => {
@@ -22,7 +17,7 @@
 
 <nav>
   <div class="nav-container">
-    <button class="hamburger" on:click={toggleSidebar}>&#9776;</button>
+    <button class="hamburger">&#9776;</button>
     <img src={logo} alt="Logo" class="logo" />
     <div class="navbar-links">
       <input
@@ -45,6 +40,7 @@
     background: linear-gradient(to bottom, rgba(0, 0, 0, 0.842), rgba(0, 0, 0, 0.064)); /* Transparent gradient */
     padding: 10px 0;
     position: relative;
+    z-index: 10;
   }
 
   .nav-container {
@@ -54,6 +50,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 0 20px;
+    z-index: 10;
   }
 
   .logo {
@@ -102,68 +99,11 @@
     transform: scale(1.05);
   }
 
-  /* Hamburger Icon */
   .hamburger {
     font-size: 30px;
-    color: white;
+    color: transparent;
     background: transparent;
     border: none;
-    cursor: pointer;
-    transition: color 0.3s;
   }
 
-  .hamburger:hover {
-    color: #1abc9c; /* Hover effect for the hamburger icon */
-  }
-
-  /* Sidebar
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 250px;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.9);
-    display: flex;
-    flex-direction: column;
-    padding-top: 60px;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
-    transition: transform 0.3s ease-out;
-  }
-
-  .sidebar ul {
-    list-style: none;
-    padding: 0;
-  }
-
-  .sidebar ul li {
-    padding: 15px;
-    border-bottom: 1px solid #444;
-  }
-
-  .sidebar ul li:last-child {
-    border-bottom: none;
-  }
-
-  .sidebar ul li p {
-    color: white;
-    font-size: 20px;
-    font-weight: 500;
-    text-align: center;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-
-  .sidebar ul li p:hover {
-    background-color: rgba(26, 188, 156, 0.5); /* Hover effect for list items */
-  /* } */
-
-  /* Sidebar Transition */
-  /* .sidebar {
-    transform: translateX(-100%);
-  }
-
-  .sidebar-active {
-    transform: translateX(0); /* Move sidebar into view */
-  /* } */
 </style>

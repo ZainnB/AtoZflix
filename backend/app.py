@@ -202,6 +202,26 @@ def top_rated_movies():
         print(f"Error fetching top rated movies: {e}")
         return jsonify({"error": "Failed to fetch top rated movies"}), 500
     
+@app.route('/api/get_genre_names')
+def get_all_genre():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    query = """SELECT DISTINCT genre_name FROM Genres"""
+    try:
+        cursor.execute(query)
+        genres = cursor.fetchall()
+        
+        # Flatten the list of tuples to a list of strings
+        genre_names = [genre[0] for genre in genres]
+        
+        return jsonify({"genres": genre_names}), 200
+    except Exception as e:
+        print(f"Error fetching genre details: {e}")
+        return jsonify({"error": "Failed to fetch genre details"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
 
 @app.route("/api/genre", methods=["GET"])
 def genre_movies():
@@ -245,6 +265,53 @@ def genre_movies():
     else:
         return jsonify({"error": "Genre not found"}), 404
 
+
+@app.route("/api/get_country_names", methods=["GET"])
+def get_all_countries():
+    conn = sqlite3.connect('movies.db')
+    cursor = conn.cursor()
+    query = """SELECT DISTINCT country FROM Movies"""
+    try:
+        cursor.execute(query)
+        countries = cursor.fetchall()
+        country_names = [country[0] for country in countries]
+        return jsonify({"countries": country_names}), 200
+    except Exception as e:
+        print(f"Error fetching country details: {e}")
+        return jsonify({"error": "Failed to fetch country details"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route("/api/country", methods=["GET"])
+def country_movies():
+    country = request.args.get("country", type=str)
+    limit = request.args.get("limit", default=10, type=int)
+    
+    # Fetch movies for the given country
+    query = """
+    SELECT m.poster_path, m.movie_id
+    FROM Movies m
+    WHERE m.country = ?
+    LIMIT ?
+    """
+    
+    conn = sqlite3.connect('movies.db')
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute(query, (country, limit))
+        movies = cursor.fetchall()
+        conn.close()
+        formatted_movies = [
+            {"poster_path": movie[0],
+             "movie_id" : movie[1]
+            } for movie in movies
+        ]
+        return jsonify({"movies": formatted_movies}), 200
+    except Exception as e:
+        print(f"Error fetching country movies: {e}")
+        return jsonify({"error": "Failed to fetch country movies"}), 500
 
 @app.route("/api/search_movie", methods=["GET"])
 def search_movies():
@@ -406,26 +473,6 @@ def movie_details():
     except Exception as e:
         print(f"Error fetching movie details: {e}")
         return jsonify({"error": "Failed to fetch movie details"}), 500
-
-@app.route('/api/get_genre_names')
-def get_all_genre():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    query = """SELECT DISTINCT genre_name FROM Genres"""
-    try:
-        cursor.execute(query)
-        genres = cursor.fetchall()
-        
-        # Flatten the list of tuples to a list of strings
-        genre_names = [genre[0] for genre in genres]
-        
-        return jsonify({"genres": genre_names}), 200
-    except Exception as e:
-        print(f"Error fetching genre details: {e}")
-        return jsonify({"error": "Failed to fetch genre details"}), 500
-    finally:
-        cursor.close()
-        conn.close()
 
 @app.route('/')
 def home():

@@ -125,7 +125,7 @@
     /* Transparent Movie Info */
     .movie-info {
         padding: 1rem;
-        padding-top: 41%;
+        padding-top: 45%;
         color: rgb(255, 255, 255);
         display: flex;
         flex-direction: column;

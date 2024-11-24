@@ -1,15 +1,17 @@
-<script>
-    export let width = "100%"; // Default to full width
-    export let color = "#333"; // Default gray color
-    export let thickness = "1px"; // Default thickness
-    export let margin = "0"; // Default top and bottom spacing
-</script>
-
-<div class="line" style="width: {width}; background-color: {color}; height: {thickness}; margin: {margin};"></div>
+<div class="margin"></div>
+<div class="line"></div>
 
 <style>
-    .line {
-        display: block;
-		border-bottom: 8px solid #333;
+    .margin {
+      width: 100%;
+      height: 40px;
+      background-color:  #121212;
     }
-</style>
+    .line {
+      width: 100%;
+      height: 7px;
+      background-color: #333;
+    }
+  
+  </style>
+  
