@@ -1,5 +1,6 @@
 <script>
     import { onMount } from "svelte";
+    import { redirectToRegisterIfNotAuthenticated } from "../../../utils/auth.js";
     import Navbar from "../Home/Navbar2.svelte";
     import SideBar from "../Home/SideBar.svelte";
     import Footer from "../Register/Footer1.svelte";
@@ -11,6 +12,7 @@
     let sidebar = false;
 
     onMount(async () => {
+        redirectToRegisterIfNotAuthenticated();
         const params = new URLSearchParams(window.location.search); // Get query parameters
         movie_id = params.get("movie_id"); // Extract movie_id
         if (!movie_id) {

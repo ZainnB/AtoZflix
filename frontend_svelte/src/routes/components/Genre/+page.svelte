@@ -1,4 +1,5 @@
 <script>
+    import { redirectToRegisterIfNotAuthenticated } from "../../../utils/auth.js";
   import MovieCard from "../Slider/movie_card.svelte";
   import GenreSlider from "../GenreSlider/+page.svelte";
   import Navbar from "../Home/Navbar2.svelte";
@@ -13,6 +14,7 @@
 
   // Fetch genre list on component mount
   onMount(async () => {
+    redirectToRegisterIfNotAuthenticated();
       const response = await fetch("http://127.0.0.1:5000/api/get_genre_names");
       if (!response.ok) {
           console.error("Failed to fetch genre list");

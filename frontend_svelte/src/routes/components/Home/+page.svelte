@@ -1,5 +1,6 @@
 <script>
     import { onMount } from "svelte";
+    import { redirectToRegisterIfNotAuthenticated } from "../../../utils/auth.js";
     import Navbar from "./Navbar2.svelte";
     import SideBar from "./SideBar.svelte";
     import TrendingMovies from "./Top5big.svelte";
@@ -9,9 +10,11 @@
     import Footer from "../Register/Footer1.svelte";
     import Line from "../Register/Line.svelte";
 
+
     let sidebar = false;
 
     onMount(async () => {
+        redirectToRegisterIfNotAuthenticated();
         console.log("Page loaded successfully");
     });
 </script>

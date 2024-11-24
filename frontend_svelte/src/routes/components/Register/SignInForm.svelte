@@ -4,26 +4,34 @@
     let password = "";
   
     const handleSignIn = async () => {
-      console.log("Username or Email:", usernameOrEmail); // Debug input values
-      console.log("Password:", password);
-  
-      const response = await fetch("http://127.0.0.1:5000/api/signin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: usernameOrEmail, password }),
-      });
-  
-      const data = await response.json();
-      console.log("Response from Backend:", data); // Debug backend response
-  
-      if (data.success) {
-        alert("Login successful!");
-        onClose(); // Close the form after success
-        window.location.href="./Home";
-      } else {
-        alert(data.message || "Invalid credentials!");
-      }
-    };
+  console.log("Username or Email:", usernameOrEmail); // Debug input values
+  console.log("Password:", password);
+
+  const response = await fetch("http://127.0.0.1:5000/api/signin", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username: usernameOrEmail, password }),
+  });
+
+  const data = await response.json();
+  console.log("Response from Backend:", data); // Debug backend response
+
+  if (data.success) {
+    alert("Login successful!");
+
+    // Save credentials to localStorage
+    localStorage.setItem("user", JSON.stringify({
+      username: usernameOrEmail,
+      token: data.token, // Assuming the backend sends a token
+    }));
+
+    // Redirect to home
+    window.location.href = "./Home";
+  } else {
+    alert(data.message || "Invalid credentials!");
+  }
+};
+
   </script>
   
   <div class="overlay">

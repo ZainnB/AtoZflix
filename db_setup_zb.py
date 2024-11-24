@@ -131,6 +131,7 @@ cursor.execute('''
             )
 ''')
 
+#Favourites Table
 cursor.execute('''
             CREATE TABLE IF NOT EXISTS Favorites (
                 user_id INT NOT NULL,
@@ -144,6 +145,7 @@ cursor.execute('''
             )
 ''')
 
+#To be watched table
 cursor.execute('''
             CREATE TABLE IF NOT EXISTS To_Be_Watched (
                 user_id INT NOT NULL,

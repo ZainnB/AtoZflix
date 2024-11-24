@@ -9,9 +9,18 @@
   };
 
   const handleLogout = () => {
-    console.log("User logged out");
-    window.location.href = "/"; // Redirect to homepage or login
-  };
+  console.log("User logged out");
+
+  // Clear all localStorage data
+  localStorage.clear();
+
+  // Optionally clear sessionStorage if you're using it
+  sessionStorage.clear();
+
+  // Redirect to homepage or login page
+  window.location.href = "/";
+};
+
 
 </script>
 

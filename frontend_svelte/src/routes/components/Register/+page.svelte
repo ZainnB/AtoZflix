@@ -4,7 +4,12 @@
   import FAQ from "./FAQ.svelte";
   import Footer from "./Footer1.svelte";
   import Line from "./Line.svelte";
+  import { redirectToHomeIfAuthenticated } from "../../../utils/auth.js";
+    import { onMount } from "svelte";
 
+  onMount(async ()=>{
+    redirectToHomeIfAuthenticated();
+  })
   const faqQuestions = [
     {
       title: "How does the recommendation system understand my preferences?",
