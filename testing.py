@@ -263,13 +263,8 @@ app = Flask(__name__)
 def get_movies():
     conn = sqlite3.connect('movies.db')
     cursor = conn.cursor()
-<<<<<<< Updated upstream
-    cursor.execute('SELECT * FROM Users;')
-    users = cursor.fetchall()
-=======
     cursor.execute('SELECT * FROM Users;')  # Adjust the query as needed
     movies = cursor.fetchall()
->>>>>>> Stashed changes
     conn.close()
 
     # Convert list of tuples to a list of dictionaries

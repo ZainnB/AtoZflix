@@ -364,14 +364,14 @@ def search_actors():
 
     # Database connection
     conn = sqlite3.connect('movies.db')
-    conn.row_factory = sqlite3.Row  # Allow dict-style access to rows
+    conn.row_factory = sqlite3.Row 
     cursor = conn.cursor()
 
     # SQL query to search for actors by name
     sql_query = """
-    SELECT a.actor_id, a.name
+    SELECT a.actor_id, a.actor_name
     FROM Actors a
-    WHERE a.name LIKE ? COLLATE NOCASE
+    WHERE a.actor_name LIKE ? COLLATE NOCASE
     LIMIT ?
     """
 
@@ -462,85 +462,100 @@ def search_crew():
         return jsonify({"error": "Failed to fetch crew movies"}), 500
 
 
-def get_top_actors_with_movies(top_n):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    # SQLite query to fetch top actors and their movies
-    query = """
-    WITH ActorRatings AS (
-        SELECT
-            a.actor_id,
-            a.actor_name,
-            SUM(m.rating_avg) AS total_rating
-        FROM
-            Actors a
-        JOIN Movies_Actors ma ON a.actor_id = ma.actor_id
-        JOIN Movies m ON ma.movie_id = m.movie_id
-        GROUP BY a.actor_id, a.actor_name
-    ),
-    TopActors AS (
-        SELECT
-            actor_id,
-            actor_name,
-            total_rating
-        FROM ActorRatings
-        ORDER BY total_rating DESC
-        LIMIT ?
-    ),
-    ActorMovies AS (
-        SELECT
-            a.actor_id,
-            m.movie_id,
-            m.poster_path,
-            m.rating_avg
-        FROM
-            Movies m
-        JOIN Movies_Actors ma ON m.movie_id = ma.movie_id
-        JOIN TopActors a ON ma.actor_id = a.actor_id
-        ORDER BY a.actor_id, m.rating_avg DESC
-    )
-    SELECT
-        a.actor_id,
-        a.actor_name,
-        JSON_GROUP_ARRAY(
-            JSON_OBJECT('movie_id', am.movie_id, 'poster_path', am.poster_path)
-        ) AS top_movies
-    FROM
-        TopActors a
-    JOIN
-        ActorMovies am ON a.actor_id = am.actor_id
-    GROUP BY
-        a.actor_id, a.actor_name;
-    """
-    
-    cursor.execute(query, (top_n,))
-    results = cursor.fetchall()
-    conn.close()
-    
-    # Format response
-    actors_with_movies = []
-    for actor_id, actor_name, top_movies in results:
-        actors_with_movies.append({
-            "actor_id": actor_id,
-            "actor_name": actor_name,
-            "top_movies": json.loads(top_movies)  # Parse JSON from SQLite result
-        })
-    return actors_with_movies
-
 @app.route('/api/top-actors', methods=['GET'])
 def get_top_actors():
     try:
-        # Get the number of top actors from request parameters (default: 5)
-        top_n = int(request.args.get('top_n', 5))
+        # Get the limit parameter (default: 5)
+        limit = int(request.args.get('limit', 5))
         
-        # Replace with your database path
-        actors_with_movies = get_top_actors_with_movies(top_n)
+        # SQLite query to fetch top-rated actor IDs and names
+        query = """
+        WITH ActorRatings AS (
+            SELECT
+                a.actor_id,
+                a.actor_name AS actor_name,
+                SUM(m.rating_avg) AS total_rating
+            FROM
+                Actors a
+            JOIN Movies_Actors ma ON a.actor_id = ma.actor_id
+            JOIN Movies m ON ma.movie_id = m.movie_id
+            GROUP BY a.actor_id
+        )
+        SELECT
+            actor_id,
+            actor_name
+        FROM
+            ActorRatings
+        ORDER BY total_rating DESC
+        LIMIT ?;
+        """
         
-        return jsonify({"status": "success", "data": actors_with_movies}), 200
+        # Database connection
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Execute the query with the limit parameter
+        cursor.execute(query, (limit,))
+        results = cursor.fetchall()
+        
+        conn.close()
+        
+        # Format response as list of dictionaries containing actor_id and actor_name
+        actors = [{"actor_id": actor_id, "actor_name": actor_name} for (actor_id, actor_name) in results]
+        
+        return jsonify({"status": "success", "data": actors}), 200
+        
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route('/api/actor-movies', methods=['GET'])
+def get_actor_movies():
+    try:
+        # Get the actor_id and limit parameters from request
+        actor_id = request.args.get('actor_id')  # Actor ID as a parameter
+        limit = int(request.args.get('limit', 5))  # Default limit is 5
+
+        # Check if actor_id is provided
+        if not actor_id:
+            return jsonify({"status": "error", "message": "actor_id parameter is required"}), 400
+
+        # SQLite query to fetch movies for the given actor_id ordered by rating
+        query = """
+        SELECT
+            m.poster_path,
+            m.movie_id
+        FROM
+            Movies m
+        JOIN Movies_Actors ma ON m.movie_id = ma.movie_id
+        WHERE
+            ma.actor_id = ?
+        ORDER BY
+            m.rating_avg DESC
+        LIMIT ?;
+        """
+        
+        # Database connection
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Execute the query with the actor_id and limit
+        cursor.execute(query, (actor_id, limit))
+        results = cursor.fetchall()
+        
+        conn.close()
+
+        # Format response
+        movies = []
+        for poster_path, movie_id in results:
+            movies.append({
+                "poster_path": poster_path,
+                "movie_id": movie_id
+            })
+
+        return jsonify({"status": "success", "data": movies}), 200
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route("/api/movie_details", methods=["GET"])
 def movie_details():

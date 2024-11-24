@@ -19,7 +19,6 @@
   };
 
   const handleLogout = () => {
-<<<<<<< Updated upstream
   console.log("User logged out");
 
   // Clear all localStorage data
@@ -32,11 +31,6 @@
   window.location.href = "/";
 };
 
-=======
-    console.log("User logged out");
-    window.location.href = "/";
-  };
->>>>>>> Stashed changes
 
 </script>
 
@@ -49,7 +43,7 @@
         type="text"
         class="navbar-search"
         bind:value={searchQuery}
-        placeholder="Search movies..."
+        placeholder="Search Movies..."
         on:keydown={handleKeyDown}
       />
     </div>

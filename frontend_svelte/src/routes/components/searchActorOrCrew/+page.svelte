@@ -7,6 +7,7 @@
     import Footer from "../Register/Footer1.svelte";
     import Line from "../Register/Line.svelte";
   
+    let type = "";
     let query = "";
     let movies = [];
     let error = "";
@@ -14,26 +15,28 @@
   
     // Extract query parameter on mount
     onMount(async () => {
-      redirectToRegisterIfNotAuthenticated();
-      const urlParams = new URLSearchParams(window.location.search);
-      query = urlParams.get("query");
-  
-      if (query) {
-        try {
-          const response = await fetch(`http://localhost:5000/api/search_movie?query=${encodeURIComponent(query)}&limit=10`);
-          const data = await response.json();
-  
-          if (response.ok) {
-            movies = data.movies;
-          } else {
-            error = data.error || "Failed to fetch movies.";
-          }
-        } catch (err) {
-          error = "An error occurred while fetching movies.";
-          console.error(err);
-        }
+  redirectToRegisterIfNotAuthenticated();
+  const urlParams = new URLSearchParams(window.location.search);
+  query = urlParams.get("query"); // Assign to existing `let query`
+  type = urlParams.get("type");  // Assign to existing `let type`
+
+  if (query) {
+    try {
+      const response = await fetch(`http://localhost:5000/api/search_${type}?query=${encodeURIComponent(query)}&limit=10`);
+      const data = await response.json();
+
+      if (response.ok) {
+        movies = data.movies;
+      } else {
+        error = data.error || "Failed to fetch movies.";
       }
-    });
+    } catch (err) {
+      error = "An error occurred while fetching movies.";
+      console.error(err);
+    }
+  }
+});
+
   </script>
   
   <div class="wrapper">
