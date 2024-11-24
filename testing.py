@@ -259,16 +259,24 @@ app = Flask(__name__)
 #     conn.close()
 #     return jsonify(movies)
 
-
-
 @app.route('/movies')
-def get_users():
+def get_movies():
     conn = sqlite3.connect('movies.db')
     cursor = conn.cursor()
+<<<<<<< Updated upstream
     cursor.execute('SELECT * FROM Users;')
     users = cursor.fetchall()
+=======
+    cursor.execute('SELECT * FROM Users;')  # Adjust the query as needed
+    movies = cursor.fetchall()
+>>>>>>> Stashed changes
     conn.close()
-    return jsonify(users)
+
+    # Convert list of tuples to a list of dictionaries
+    columns = [description[0] for description in cursor.description]
+    movies_list = [dict(zip(columns, row)) for row in movies]
+
+    return jsonify(movies_list)
 
 
 # def main():

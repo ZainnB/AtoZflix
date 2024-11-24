@@ -1,14 +1,25 @@
 <script>
-  // import { onMount } from 'svelte';
+  import { onMount } from 'svelte';
   export let logo = "/assets/img/logo.png";
 
   let searchQuery = "";
 
-  const handleSearch = () => {
-    console.log("Searching for:", searchQuery);
+  const handleSearch = async () => {
+    console.log("Search query:", searchQuery);
+    if (searchQuery.trim()) {
+      window.location.href = `/components/movieSearchResult?query=${encodeURIComponent(searchQuery)}`;
+    }
+  };
+
+  // Handle Enter key press
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter") {
+      handleSearch();
+    }
   };
 
   const handleLogout = () => {
+<<<<<<< Updated upstream
   console.log("User logged out");
 
   // Clear all localStorage data
@@ -21,6 +32,11 @@
   window.location.href = "/";
 };
 
+=======
+    console.log("User logged out");
+    window.location.href = "/";
+  };
+>>>>>>> Stashed changes
 
 </script>
 
@@ -34,6 +50,7 @@
         class="navbar-search"
         bind:value={searchQuery}
         placeholder="Search movies..."
+        on:keydown={handleKeyDown}
       />
     </div>
     <button class="logout-btn" on:click={handleLogout}>Logout</button>

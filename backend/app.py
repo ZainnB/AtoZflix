@@ -278,9 +278,9 @@ def get_all_countries():
     query = """SELECT DISTINCT country FROM Movies"""
     try:
         cursor.execute(query)
-        countries = cursor.fetchall()
-        country_names = [country[0] for country in countries]
-        return jsonify({"countries": country_names}), 200
+        # Fetch all distinct country names
+        countries = [row[0] for row in cursor.fetchall()]
+        return jsonify({"countries": countries}), 200
     except Exception as e:
         print(f"Error fetching country details: {e}")
         return jsonify({"error": "Failed to fetch country details"}), 500
@@ -356,6 +356,112 @@ def search_movies():
         print(f"Error fetching search movies: {e}")
         return jsonify({"error": "Failed to fetch search movies"}), 500
     
+@app.route("/api/search_actor", methods=["GET"])
+def search_actors():
+    # Extract parameters from the request
+    search_query = request.args.get("query", type=str)
+    limit = request.args.get("limit", default=10, type=int)
+
+    # Database connection
+    conn = sqlite3.connect('movies.db')
+    conn.row_factory = sqlite3.Row  # Allow dict-style access to rows
+    cursor = conn.cursor()
+
+    # SQL query to search for actors by name
+    sql_query = """
+    SELECT a.actor_id, a.name
+    FROM Actors a
+    WHERE a.name LIKE ? COLLATE NOCASE
+    LIMIT ?
+    """
+
+    try:
+        # Execute the query with the correct parameters
+        cursor.execute(sql_query, (f"%{search_query}%", limit))
+        actors = cursor.fetchall()
+
+        if not actors:
+            conn.close()
+            return jsonify({"movies": [], "message": "No actors found"}), 404
+
+        actor_ids = [actor["actor_id"] for actor in actors]
+
+        # Fetch movies for the found actors
+        movie_query = """
+        SELECT DISTINCT m.poster_path, m.movie_id
+        FROM Movies m
+        INNER JOIN Movies_Actors ma ON m.movie_id = ma.movie_id
+        WHERE ma.actor_id IN ({})
+        """.format(",".join(["?"] * len(actor_ids)))
+
+        cursor.execute(movie_query, actor_ids)
+        movies = cursor.fetchall()
+        conn.close()
+
+        # Format the results
+        formatted_movies = [{"poster_path": movie["poster_path"], "movie_id": movie["movie_id"]} for movie in movies]
+
+        return jsonify({"movies": formatted_movies}), 200
+
+    except Exception as e:
+        conn.close()
+        print(f"Error fetching actor movies: {e}")
+        return jsonify({"error": "Failed to fetch actor movies"}), 500
+
+
+@app.route("/api/search_crew", methods=["GET"])
+def search_crew():
+    # Extract parameters from the request
+    search_query = request.args.get("query", type=str)
+    limit = request.args.get("limit", default=10, type=int)
+
+    # Database connection
+    conn = sqlite3.connect('movies.db')
+    conn.row_factory = sqlite3.Row  # Allow dict-style access to rows
+    cursor = conn.cursor()
+
+    # SQL query to search for crew members by name
+    sql_query = """
+    SELECT c.crew_id, c.name
+    FROM Crew c
+    WHERE c.name LIKE ? COLLATE NOCASE
+    LIMIT ?
+    """
+
+    try:
+        # Execute the query with the correct parameters
+        cursor.execute(sql_query, (f"%{search_query}%", limit))
+        crew = cursor.fetchall()
+
+        if not crew:
+            conn.close()
+            return jsonify({"movies": [], "message": "No crew members found"}), 404
+
+        crew_ids = [c["crew_id"] for c in crew]
+
+        # Fetch movies for the found crew members
+        movie_query = """
+        SELECT DISTINCT m.poster_path, m.movie_id
+        FROM Movies m
+        INNER JOIN Movies_Crew mc ON m.movie_id = mc.movie_id
+        WHERE mc.crew_id IN ({})
+        """.format(",".join(["?"] * len(crew_ids)))
+
+        cursor.execute(movie_query, crew_ids)
+        movies = cursor.fetchall()
+        conn.close()
+
+        # Format the results
+        formatted_movies = [{"poster_path": movie["poster_path"], "movie_id": movie["movie_id"]} for movie in movies]
+
+        return jsonify({"movies": formatted_movies}), 200
+
+    except Exception as e:
+        conn.close()
+        print(f"Error fetching crew movies: {e}")
+        return jsonify({"error": "Failed to fetch crew movies"}), 500
+
+
 def get_top_actors_with_movies(top_n):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -478,6 +584,7 @@ def movie_details():
     except Exception as e:
         print(f"Error fetching movie details: {e}")
         return jsonify({"error": "Failed to fetch movie details"}), 500
+
 
 @app.route('/')
 def home():

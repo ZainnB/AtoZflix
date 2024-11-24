@@ -6,7 +6,7 @@
     import TrendingMovies from "./Top5big.svelte";
     import Top15Medium from "./Top15medium.svelte";
     import Slider from "../Slider/+page.svelte";
-    import GenreSlider from "../GenreSlider/+page.svelte"
+    import GenreSlider from "../GenralSlider/+page.svelte"
     import Footer from "../Register/Footer1.svelte";
     import Line from "../Register/Line.svelte";
 
@@ -41,7 +41,7 @@
             <Slider heading={"Top Rated Movies"} api={"top_rated"} limit={20}/>
         </div>
         <div class="latest-movies-wrapper">
-            <GenreSlider heading={"Laugh out Loud"} limit={10} genre={"Comedy"} />
+            <GenreSlider type="genre" value={"Comedy"} limit={10} heading={"Laugh out Loud"} />
         </div>
 
     </div>

@@ -305,6 +305,7 @@ def main():
 def home():
     return 'Welcome to the Movies API!'
 
+<<<<<<< Updated upstream
 @app.route('/movies')
 def crew():
     conn = sqlite3.connect('movies.db')
@@ -313,5 +314,7 @@ def crew():
     genres = cursor.fetchall()
     conn.close()
     return jsonify(genres)
+=======
+>>>>>>> Stashed changes
 if __name__ == '__main__':
     app.run(debug=True)
