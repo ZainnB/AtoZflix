@@ -223,11 +223,7 @@ def genre_movies():
     if genre_id:
         # Now fetch movies for the given genre_id
         query = """
-<<<<<<< Updated upstream
-        SELECT m.poster_path,m.movie_id
-=======
         SELECT m.poster_path, m.movie_id
->>>>>>> Stashed changes
         FROM Movies m
         JOIN Movies_Genres mg ON m.movie_id = mg.movie_id
         WHERE mg.genre_id = ?
@@ -239,12 +235,8 @@ def genre_movies():
             conn.close()
             formatted_movies = [
                 {"poster_path": movie[0],
-<<<<<<< Updated upstream
-                 "movie_id": movie[1]} for movie in movies
-=======
                  "movie_id" : movie[1]
                 } for movie in movies
->>>>>>> Stashed changes
             ]
             return jsonify({"movies": formatted_movies}), 200
         except Exception as e:
