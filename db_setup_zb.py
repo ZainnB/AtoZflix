@@ -96,13 +96,19 @@ cursor.execute('''
 
 #user Table
 cursor.execute('''
-            CREATE TABLE IF NOT EXISTS Users (
-                user_id INT PRIMARY KEY,
-                email VARCHAR(255) NOT NULL UNIQUE CHECK(email LIKE '%_@__%.__%'),
-                username VARCHAR(255) NOT NULL,
-                password VARCHAR(255) NOT NULL
-);
+    DROP TABLE IF EXISTS Users;
 ''')
+
+cursor.execute('''
+    CREATE TABLE Users (
+        user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email VARCHAR(255) NOT NULL UNIQUE CHECK(email LIKE '%_@__%.__%'),
+        username VARCHAR(255) NOT NULL,
+        password VARCHAR(255) NOT NULL
+    );
+''')
+
+
 
 
 #Ratings Table
@@ -307,6 +313,5 @@ def crew():
     genres = cursor.fetchall()
     conn.close()
     return jsonify(genres)
-
 if __name__ == '__main__':
     app.run(debug=True)

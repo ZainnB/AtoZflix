@@ -15,7 +15,7 @@
 
   const data = await response.json();
   console.log("Response from Backend:", data); // Debug backend response
-
+  console.log(data)
   if (data.success) {
     alert("Login successful!");
 

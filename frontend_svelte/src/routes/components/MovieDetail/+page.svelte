@@ -5,33 +5,56 @@
     import SideBar from "../Home/SideBar.svelte";
     import Footer from "../Register/Footer1.svelte";
     import Line from "../Register/Line.svelte";
+    import RatingModal from "../RatingModal/RatingModal.svelte";
 
+    let isRatingOpen = false; // Controls modal visibility
     let movie_id;
     let movie = null;
     let error = null;
     let sidebar = false;
 
+    // Lifecycle: On component mount
     onMount(async () => {
         redirectToRegisterIfNotAuthenticated();
-        const params = new URLSearchParams(window.location.search); // Get query parameters
-        movie_id = params.get("movie_id"); // Extract movie_id
+        // Parse query parameters
+        const params = new URLSearchParams(window.location.search);
+        movie_id = params.get("movie_id");
         if (!movie_id) {
             error = "No movie ID provided";
             return;
         }
 
+        // Fetch movie details
         try {
             const response = await fetch(`http://127.0.0.1:5000/api/movie_details?movie_id=${movie_id}`);
-            if (!response.ok) {
-                throw new Error("Failed to fetch movie details");
-            }
+            if (!response.ok) throw new Error("Failed to fetch movie details");
             const data = await response.json();
             movie = data.movie;
         } catch (err) {
             error = err.message;
         }
     });
+
+    // Open the rating modal
+    const rateMovie = () => {
+        isRatingOpen = true;
+    };
+
+    // Close the rating modal
+    const closeRating = () => {
+        isRatingOpen = false;
+    };
+
+    // Submit the rating
+    const submitRating = ({ rating, feedback }) => {
+        console.log(`Rating: ${rating}, Feedback: ${feedback}`);
+        isRatingOpen = false;
+        // Additional logic to send rating data to the backend can be added here
+    };
 </script>
+
+<!-- Modal for rating -->
+<RatingModal bind:show={isRatingOpen} movie_id={movie_id} />
 
 <div class="movie-details">
     <div class="navbar-wrapper">
@@ -44,10 +67,16 @@
         <p class="error">{error}</p>
     {:else if movie}
         <div class="movie-header">
-            <div class="backdrop" style="background-image: url('https://image.tmdb.org/t/p/original{movie.backdrop_path}')"></div>
-            <div class="backdrop-overlay"></div> <!-- Ensuring this is placed after the backdrop -->
+            <div 
+                class="backdrop" 
+                style="background-image: url('https://image.tmdb.org/t/p/original{movie.backdrop_path}')">
+            </div>
+            <div class="backdrop-overlay"></div>
             <div class="movie-info">
-                <img src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} alt="{movie.title}" class="movie-poster" />
+                <img 
+                    src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} 
+                    alt="{movie.title}" 
+                    class="movie-poster" />
                 <div class="movie-details-text">
                     <h1>{movie.title}</h1>
                     <p><strong>Release Date:</strong> {movie.release_date}</p>
@@ -57,7 +86,7 @@
                     <div class="action-buttons">
                         <button class="favourites-btn">Add to Favourites</button>
                         <button class="to-watch-btn">Add to Watchlist</button>
-                        <button class="rate-btn">Give Rating</button>
+                        <button class="rate-btn" on:click={rateMovie}>Give Rating</button>
                     </div>
                 </div>
             </div>
@@ -68,7 +97,6 @@
     <Line />
     <Footer />
 </div>
-
 <style>
     .movie-details {
         padding: 20px;

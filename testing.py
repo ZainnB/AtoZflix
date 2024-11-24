@@ -265,7 +265,7 @@ app = Flask(__name__)
 def get_users():
     conn = sqlite3.connect('movies.db')
     cursor = conn.cursor()
-    cursor.execute('SELECT * FROM Movies WHERE Movies.title LIKE "Inception";')
+    cursor.execute('SELECT * FROM Users;')
     users = cursor.fetchall()
     conn.close()
     return jsonify(users)
@@ -286,7 +286,6 @@ def get_users():
 @app.route('/')
 def home():
     return 'Welcome to the Movies API!'
-
 if __name__ == '__main__':
     #main()
     app.run(debug=True)

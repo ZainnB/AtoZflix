@@ -82,9 +82,14 @@ def signin():
     user = conn.execute(query, (input_data,)).fetchone()
     conn.close()
 
+    if user:
+        print("Fetched User:", dict(user))  # Debug: Print user data
+    else:
+        print("No user found")
+
     # Validate the user credentials
     if user and user['password'] == password:
-        return jsonify({"success": True, "message": "Login successful"})
+        return jsonify({"user_id": user["user_id"], "success": True, "message": "Login successful"})
     else:
         return jsonify({"success": False, "message": "Invalid username or password"}), 401
 
@@ -477,6 +482,34 @@ def movie_details():
 @app.route('/')
 def home():
     return 'Welcome to the Movies API!'
+
+@app.route('/api/get_all_users', methods=['GET'])
+def getAllUsers():
+    try:
+        # Connect to the database
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Query to fetch all users
+        query = "SELECT user_id, email, username FROM Users"
+        cursor.execute(query)
+
+        # Fetch all results as a list of dictionaries
+        users = [
+            {"user_id": row[0], "email": row[1], "username": row[2]}
+            for row in cursor.fetchall()
+        ]
+
+        # Close the connection
+        conn.close()
+
+        # Return the response
+        return jsonify({"status": "success", "users": users})
+
+    except Exception as e:
+        # Handle errors
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 
 if __name__ == "__main__":
     app.run(debug=True)
