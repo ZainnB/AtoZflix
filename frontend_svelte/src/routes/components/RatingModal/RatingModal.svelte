@@ -1,14 +1,55 @@
 <script>
+    import { onMount } from "svelte";
+
     export let show = false; // Controls the visibility of the modal
     export let movie_id;
+    let user_id;
     let rating = 0; // State to hold the user's rating
     let feedback = ""; // State to hold the user's feedback
+    let user;
     const closeModal = ()=>{
         show=false;
     }
-    const submitRating = () =>{
+    const submitRating = async () =>{
+        const data = {
+            user_id:user_id,
+            movie_id:movie_id,
+            rating:rating,
+            review:feedback
+        }
+        try {
+      const response = await fetch('http://127.0.0.1:5000/api/rate_movie', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+      
+      if (response.ok) {
+        console.log('Success:', result.message);
+        alert('Rating submitted successfully!');
+      } else {
+        console.log('Error:', result.message);
+        alert('Error: ' + result.message);
+      }
+    } catch (error) {
+      console.error('Request failed', error);
+      alert('An error occurred. Please try again.');
+    }
         show= false;
     }
+  onMount(() => {
+    user =JSON.parse(localStorage.getItem('user'));
+    user_id=user["userId"]
+    if (user_id) {
+      console.log('User ID from localStorage:', user_id);
+    } else {
+      console.log('No user ID found in localStorage');
+    }
+  });
   </script>
   
   {#if show}
