@@ -820,35 +820,6 @@ def get_favourites():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-@app.route('/api/remove_favourite', methods=['DELETE'])
-def remove_favourite():
-    try:
-        data = request.get_json()
-        user_id = data.get('user_id')
-        movie_id = data.get('movie_id')
-
-        if not user_id or not movie_id:
-            return jsonify({"status": "error", "message": "User ID and Movie ID are required"}), 400
-
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        # Delete the favourite entry
-        cursor.execute("""
-            DELETE FROM Favorites 
-            WHERE user_id = ? AND movie_id = ?
-        """, (user_id, movie_id))
-
-        if cursor.rowcount == 0:
-            return jsonify({"status": "error", "message": "Favourite not found"}), 404
-
-        conn.commit()
-        conn.close()
-
-        return jsonify({"status": "success", "message": "Favourite removed successfully"}), 200
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
-
 
 @app.route('/api/get_all_users', methods=['GET'])
 def getAllUsers():
@@ -962,7 +933,7 @@ def add_to_favorites():
         return jsonify({"success": False, "message": str(e)}), 500
  
 
-@app.route('/api/remove_favorite', methods=['POST'])
+@app.route('/api/remove_favourite', methods=['POST'])
 def remove_from_favorites():
     try:
         data = request.get_json()
@@ -1089,9 +1060,8 @@ def check_watchlist():
 
     try:
         cursor.execute('''
-            SELECT 1 FROM WatchLater
-             WHERE user_id = ? AND movie_id = ?
-            LIMIT 1;
+            SELECT COUNT(*) as count FROM WatchLater
+             WHERE user_id = ? AND movie_id = ?;
         ''', (user_id, movie_id))
         result = cursor.fetchone()
         print(result)

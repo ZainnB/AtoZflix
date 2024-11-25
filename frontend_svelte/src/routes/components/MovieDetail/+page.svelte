@@ -64,7 +64,7 @@
 
     const toggleFavourite = async () => {
         const url = isFavourite
-            ? `http://127.0.0.1:5000/api/remove_favorite`
+            ? `http://127.0.0.1:5000/api/remove_favourite`
             : `http://127.0.0.1:5000/api/add_favourite`;
 
         const response = await fetch(url, {
