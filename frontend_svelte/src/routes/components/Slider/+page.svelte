@@ -35,12 +35,17 @@
         currentIndex -= 1;
       }
     }
+
+    function viewAll() {
+      const url = `/components/ViewAll?type=${encodeURIComponent(api)}&heading=${encodeURIComponent(heading)}`;
+      window.location.href = url;
+    }
   </script>
   
   <div class="latest-movies">
     <div class="slider-header">
       <h2>{heading}</h2>
-      <button class="view-all-btn">View All</button>
+      <button class="view-all-btn" on:click={viewAll}>View All</button>
     </div>
   
     <div class="slider-wrapper">

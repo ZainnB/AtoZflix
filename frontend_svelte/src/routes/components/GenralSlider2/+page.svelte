@@ -2,17 +2,17 @@
     import { onMount } from "svelte";
     import MovieCard from "../Slider/movie_card.svelte";
   
+    export let api_name;            
     export let type;            
     export let value;
-    export let limit;      
-    export let heading;
+    export let limit;
     let movies = [];      
     let currentIndex = 0; 
     
     // On component mount, fetch movies from the API
     onMount(async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:5000/api/${type}?actor_id=${value}&limit=${limit}`);
+        const response = await fetch(`http://127.0.0.1:5000/api/${api_name}?${type}_id=${value}&limit=${limit}`);
         if (!response.ok) {
           console.error("Failed to fetch actor movies:", response.status);
           return;
@@ -39,13 +39,14 @@
         currentIndex -= 1;
       }
     }
+
+    function handleViewAll() {
+        window.location.href = `/components/searchActorOrCrew?type=${encodeURIComponent(type)}&id=${encodeURIComponent(value)}`;
+    }
   </script>
   
   <div class="latest-movies">
-    <div class="slider-header">
-      <h2>{heading}</h2>
-      <button class="view-all-btn">View All</button>
-    </div>
+    <button class="view-all-btn" on:click={handleViewAll}>View All</button>
   
     <div class="slider-wrapper">
       <button class="slider-btn left" on:click={prevSlide}>&lt;</button>
@@ -64,24 +65,10 @@
     .latest-movies {
       width: 100%;
       max-width: 1400px;
-      margin: 0.2rem auto;
       color: #ffffff;
-      background-color: #121212;
-      padding: 0.2rem;
       border-radius: 7px;
-    }
-  
-    .slider-header {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.5rem; /* Reduced gap between header and slider */
-    }
-  
-    .slider-header h2 {
-      font-size: 1.5rem;
-      font-weight: bold;
-      margin: 0;
+      flex-direction: column;
     }
   
     .view-all-btn {
@@ -91,6 +78,7 @@
       font-size: 0.9rem;
       cursor: pointer;
       transition: color 0.3s ease;
+      margin-left: auto;
     }
   
     .view-all-btn:hover {

@@ -149,27 +149,55 @@ def get_trending_movies():
         return jsonify({"status": "error", "message": str(e)}), 500
     
 
+# @app.route("/api/latest", methods=["GET"])
+# def latest_movies():
+#     limit = request.args.get("limit", default=10, type=int)
+#     conn = sqlite3.connect('movies.db')  
+#     cursor = conn.cursor()
+#     # Query to fetch the latest movies
+#     query = """
+#     SELECT m.poster_path, m.movie_id
+#     FROM Movies m
+#     ORDER BY m.release_date DESC
+#     LIMIT ?
+#     """
+    
+#     try:
+#         # Execute query with limit
+#         cursor.execute(query, (limit,))
+#         movies = cursor.fetchall()
+#         conn.close()
+#         formatted_movies = [
+#             {"poster_path": movie[0],
+#              "movie_id" : movie[1]
+#             } for movie in movies
+#         ]
+#         return jsonify({"movies": formatted_movies}), 200
+    
+#     except Exception as e:
+#         print(f"Error fetching latest movies: {e}")
+#         return jsonify({"error": "Failed to fetch latest movies"}), 500
+    
 @app.route("/api/latest", methods=["GET"])
 def latest_movies():
-    limit = request.args.get("limit", default=10, type=int)
+    limit = request.args.get("limit", default=80, type=int)  # Default to 80 movies per page
+    offset = request.args.get("offset", default=0, type=int)  # Offset for pagination
     conn = sqlite3.connect('movies.db')  
     cursor = conn.cursor()
-    # Query to fetch the latest movies
     query = """
     SELECT m.poster_path, m.movie_id
     FROM Movies m
     ORDER BY m.release_date DESC
-    LIMIT ?
+    LIMIT ? OFFSET ?
     """
     
     try:
-        # Execute query with limit
-        cursor.execute(query, (limit,))
+        cursor.execute(query, (limit, offset))
         movies = cursor.fetchall()
         conn.close()
         formatted_movies = [
             {"poster_path": movie[0],
-             "movie_id" : movie[1]
+             "movie_id": movie[1]
             } for movie in movies
         ]
         return jsonify({"movies": formatted_movies}), 200
@@ -177,7 +205,7 @@ def latest_movies():
     except Exception as e:
         print(f"Error fetching latest movies: {e}")
         return jsonify({"error": "Failed to fetch latest movies"}), 500
-    
+
 @app.route("/api/top_rated", methods=["GET"])
 def top_rated_movies():
     limit = request.args.get("limit", default=10, type=int)
@@ -359,24 +387,36 @@ def search_movies():
 @app.route("/api/search_actor", methods=["GET"])
 def search_actors():
     # Extract parameters from the request
+    actor_id = request.args.get("actor_id", type=int)
     search_query = request.args.get("query", type=str)
     limit = request.args.get("limit", default=10, type=int)
 
     # Database connection
     conn = sqlite3.connect('movies.db')
-    conn.row_factory = sqlite3.Row 
+    conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
-    # SQL query to search for actors by name
-    sql_query = """
-    SELECT a.actor_id, a.actor_name
-    FROM Actors a
-    WHERE a.actor_name LIKE ? COLLATE NOCASE
-    LIMIT ?
-    """
-
     try:
-        # Execute the query with the correct parameters
+        # If actor_id is provided, fetch the actor's name
+        if actor_id:
+            actor_query = "SELECT actor_name FROM Actors WHERE actor_id = ?"
+            cursor.execute(actor_query, (actor_id,))
+            actor = cursor.fetchone()
+
+            if not actor:
+                conn.close()
+                return jsonify({"movies": [], "message": "Actor not found"}), 404
+
+            # Use the actor's name as the search query
+            search_query = actor["actor_name"]
+
+        # SQL query to search for actors by name
+        sql_query = """
+        SELECT a.actor_id, a.actor_name
+        FROM Actors a
+        WHERE a.actor_name LIKE ? COLLATE NOCASE
+        LIMIT ?
+        """
         cursor.execute(sql_query, (f"%{search_query}%", limit))
         actors = cursor.fetchall()
 
@@ -391,9 +431,9 @@ def search_actors():
         SELECT DISTINCT m.poster_path, m.movie_id
         FROM Movies m
         INNER JOIN Movies_Actors ma ON m.movie_id = ma.movie_id
-        WHERE ma.actor_id IN ({})
+        WHERE ma.actor_id IN ({});
         """.format(",".join(["?"] * len(actor_ids)))
-
+        
         cursor.execute(movie_query, actor_ids)
         movies = cursor.fetchall()
         conn.close()
@@ -413,6 +453,7 @@ def search_actors():
 def search_crew():
     # Extract parameters from the request
     search_query = request.args.get("query", type=str)
+    crew_id = request.args.get("crew_id", type=int)  # Allow search by crew_id
     limit = request.args.get("limit", default=10, type=int)
 
     # Database connection
@@ -420,16 +461,32 @@ def search_crew():
     conn.row_factory = sqlite3.Row  # Allow dict-style access to rows
     cursor = conn.cursor()
 
-    # SQL query to search for crew members by name
-    sql_query = """
-    SELECT c.crew_id, c.name
-    FROM Crew c
-    WHERE c.name LIKE ? COLLATE NOCASE
-    LIMIT ?
-    """
-
     try:
-        # Execute the query with the correct parameters
+        # If crew_id is provided, find the crew name and update the search query
+        if crew_id:
+            crew_query = "SELECT crew_name FROM Crew WHERE crew_id = ?"
+            cursor.execute(crew_query, (crew_id,))
+            crew = cursor.fetchone()
+
+            if not crew:
+                conn.close()
+                return jsonify({"movies": [], "message": "Crew member not found"}), 404
+
+            # Use the crew's name as the search query
+            search_query = crew["crew_name"]
+
+        # If no search query is available at this point, return an error
+        if not search_query:
+            conn.close()
+            return jsonify({"error": "No valid parameters provided"}), 400
+
+        # Search for crew members by name
+        sql_query = """
+        SELECT c.crew_id, c.crew_name
+        FROM Crew c
+        WHERE c.crew_name LIKE ? COLLATE NOCASE
+        LIMIT ?
+        """
         cursor.execute(sql_query, (f"%{search_query}%", limit))
         crew = cursor.fetchall()
 
@@ -455,6 +512,11 @@ def search_crew():
         formatted_movies = [{"poster_path": movie["poster_path"], "movie_id": movie["movie_id"]} for movie in movies]
 
         return jsonify({"movies": formatted_movies}), 200
+
+    except Exception as e:
+        conn.close()
+        print(f"Error fetching crew movies: {e}")
+        return jsonify({"error": "Failed to fetch crew movies"}), 500
 
     except Exception as e:
         conn.close()
@@ -519,7 +581,6 @@ def get_actor_movies():
         if not actor_id:
             return jsonify({"status": "error", "message": "actor_id parameter is required"}), 400
 
-        # SQLite query to fetch movies for the given actor_id ordered by rating
         query = """
         SELECT
             m.poster_path,
@@ -534,17 +595,102 @@ def get_actor_movies():
         LIMIT ?;
         """
         
-        # Database connection
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # Execute the query with the actor_id and limit
         cursor.execute(query, (actor_id, limit))
         results = cursor.fetchall()
         
         conn.close()
 
-        # Format response
+        movies = []
+        for poster_path, movie_id in results:
+            movies.append({
+                "poster_path": poster_path,
+                "movie_id": movie_id
+            })
+
+        return jsonify({"status": "success", "data": movies}), 200
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route('/api/top-crew', methods=['GET'])
+def get_top_crew():
+    try:
+        limit = int(request.args.get('limit', 5))
+        
+        # SQLite query to fetch top-rated crew IDs and names
+        query = """
+        WITH CrewRatings AS (
+            SELECT
+                c.crew_id,
+                c.crew_name AS crew_name,
+                c.job_title AS job_title,
+                SUM(m.rating_avg) AS total_rating
+            FROM
+                Crew c
+            JOIN Movies_Crew mc ON c.crew_id = mc.crew_id
+            JOIN Movies m ON mc.movie_id = m.movie_id
+            GROUP BY c.crew_id
+        )
+        SELECT
+            crew_id,
+            crew_name,
+            job_title
+        FROM
+            CrewRatings
+        ORDER BY total_rating DESC
+        LIMIT ?;
+        """
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(query, (limit,))
+        results = cursor.fetchall()
+        
+        conn.close()
+        
+        crew = [{"crew_id": crew_id, "crew_name": crew_name, "job_title": job_title} for (crew_id, crew_name, job_title) in results]
+        
+        return jsonify({"status": "success", "data": crew}), 200
+        
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route('/api/crew-movies', methods=['GET'])
+def get_crew_movies():
+    try:
+        crew_id = request.args.get('crew_id')
+        limit = int(request.args.get('limit', 5))
+
+        if not crew_id:
+            return jsonify({"status": "error", "message": "crew_id parameter is required"}), 400
+
+        query = """
+        SELECT
+            m.poster_path,
+            m.movie_id
+        FROM
+            Movies m
+        JOIN Movies_Crew mc ON m.movie_id = mc.movie_id
+        WHERE
+            mc.crew_id = ?
+        ORDER BY
+            m.rating_avg DESC
+        LIMIT ?;
+        """
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute(query, (crew_id, limit))
+        results = cursor.fetchall()
+        
+        conn.close()
+
         movies = []
         for poster_path, movie_id in results:
             movies.append({
@@ -601,10 +747,6 @@ def movie_details():
         return jsonify({"error": "Failed to fetch movie details"}), 500
 
 
-@app.route('/')
-def home():
-    return 'Welcome to the Movies API!'
-
 @app.route('/api/rate_movie', methods=['POST'])
 def rate_movie():
     try:
@@ -628,6 +770,84 @@ def rate_movie():
         return jsonify({"status": "success", "message": "Rating added successfully"}), 201
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+
+#favorites
+@app.route('/api/get_favourites', methods=['GET'])
+def get_favourites():
+    user_id = request.args.get('user_id')  # Get user_id from query parameters
+    if not user_id:
+        return jsonify({"status": "error", "message": "User ID is required"}), 400
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Query to fetch favourites, movie details, and rating details
+        cursor.execute("""
+            SELECT 
+                f.movie_id,
+                m.poster_path,
+                r.rating,
+                r.review,
+                r.rated_at,
+                f.added_at
+            FROM Favorites f
+            JOIN Movies m ON f.movie_id = m.movie_id
+            JOIN Ratings r ON f.rating_id = r.rating_id
+            WHERE f.user_id = ?
+            ORDER BY f.added_at DESC
+        """, (user_id,))
+
+        favourites = cursor.fetchall()
+        conn.close()
+
+        # Format the results as a list of dictionaries
+        result = [
+            {
+                "movie_id": fav[0],
+                "poster_path": fav[1],
+                "rating": fav[2],
+                "review": fav[3],
+                "rated_at": fav[4],
+                "added_at": fav[5]
+            }
+            for fav in favourites
+        ]
+
+        return jsonify({"status": "success", "favourites": result}), 200
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/remove_favourite', methods=['DELETE'])
+def remove_favourite():
+    try:
+        data = request.get_json()
+        user_id = data.get('user_id')
+        movie_id = data.get('movie_id')
+
+        if not user_id or not movie_id:
+            return jsonify({"status": "error", "message": "User ID and Movie ID are required"}), 400
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Delete the favourite entry
+        cursor.execute("""
+            DELETE FROM Favorites 
+            WHERE user_id = ? AND movie_id = ?
+        """, (user_id, movie_id))
+
+        if cursor.rowcount == 0:
+            return jsonify({"status": "error", "message": "Favourite not found"}), 404
+
+        conn.commit()
+        conn.close()
+
+        return jsonify({"status": "success", "message": "Favourite removed successfully"}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 
 @app.route('/api/get_all_users', methods=['GET'])
 def getAllUsers():
@@ -655,6 +875,7 @@ def getAllUsers():
     except Exception as e:
         # Handle errors
         return jsonify({"status": "error", "message": str(e)}), 500
+    
 @app.route('/api/get_all_ratings', methods=['GET'])
 def get_all_ratings():
     try:
@@ -698,6 +919,24 @@ def get_all_ratings():
     
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route('/api/get_movie_count', methods=['GET'])
+def get_movie_count():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM Movies")
+        count = cursor.fetchone()[0]
+        conn.close()
+        return jsonify({"status": "success", "count": count}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route('/')
+def home():
+    return 'Welcome to the Movies API!'
 
 
 if __name__ == "__main__":

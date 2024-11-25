@@ -7,34 +7,34 @@
     import Line from "../Register/Line.svelte";
 
     // State variables
-    let topActors = [];
+    let topCrew = [];
     const limit = 10;
     let sidebar = false;
-    let searchQuery = ""; // Query for searching actors
+    let searchQuery = "";
 
     onMount(async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:5000/api/top-actors?limit=${limit}`);
+        const response = await fetch(`http://127.0.0.1:5000/api/top-crew?limit=${limit}`);
         if (!response.ok) {
-          console.error("Failed to fetch top actors:", response.status);
+          console.error("Failed to fetch top crew:", response.status);
           return;
         }
 
         const data = await response.json();
         if (data.status === "success") {
-          topActors = data.data || [];
+          topCrew = data.data || [];
         } else {
-          console.error("Error in fetching actors:", data.message);
+          console.error("Error in fetching crew:", data.message);
         }
       } catch (error) {
-        console.error("Error fetching top actors:", error);
+        console.error("Error fetching top crew:", error);
       }
     });
 
     const handleSearch = async () => {
         console.log("Search query:", searchQuery);
         if (searchQuery.trim()) {
-            const type = "actor";
+            const type = "crew";
             window.location.href = `/components/searchActorOrCrew?type=${encodeURIComponent(type)}&query=${encodeURIComponent(searchQuery)}`;
         }
     };
@@ -58,27 +58,27 @@
   <div class="content">
     <!-- Search Bar Section -->
     <div class="search-section">
-      <h2 class="search-heading">Search for Your Favorite Actors</h2>
+      <h2 class="search-heading">Search for Your Favorite Directors or Producers or Writers</h2>
       <div class="navbar-links">
         <input
           type="text"
           class="navbar-search"
           bind:value={searchQuery}
-          placeholder="Search Actors..."
+          placeholder="Search Directors/Producers/Writers..."
           on:keydown={handleKeyDown}
         />
       </div>
     </div>
 
-    <h1>Top Actors</h1>
+    <h1>Top Directors/Producers/Writers</h1>
 
-    {#each topActors as { actor_id, actor_name }}
-      <div class="actor-slider">
-        <h2>{actor_name}</h2>
+    {#each topCrew as { crew_id, crew_name, job_title }}
+      <div class="crew-slider">
+        <h2>{crew_name} - {job_title}</h2>
         <GeneralSlider2 
-          api_name="actor-movies"
-          type="actor" 
-          value={actor_id} 
+          api_name="crew-movies"
+          type="crew" 
+          value={crew_id} 
           limit={5} />
       </div>
     {/each}
@@ -160,7 +160,7 @@
     margin: 20px 0;
   }
 
-  .actor-slider {
+  .crew-slider {
     margin-bottom: 2rem;
     padding: 1rem;
     background-color: #1e1e1e;

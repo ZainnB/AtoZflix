@@ -49,7 +49,6 @@
     const submitRating = ({ rating, feedback }) => {
         console.log(`Rating: ${rating}, Feedback: ${feedback}`);
         isRatingOpen = false;
-        // Additional logic to send rating data to the backend can be added here
     };
 </script>
 
@@ -85,7 +84,7 @@
                     <p><strong>Rating:</strong> {movie.rating_avg} ({movie.rating_count} votes)</p>
                     <div class="action-buttons">
                         <button class="favourites-btn">Add to Favourites</button>
-                        <button class="to-watch-btn">Add to Watchlist</button>
+                        <button class="to-watch-btn">Add to Watch Later</button>
                         <button class="rate-btn" on:click={rateMovie}>Give Rating</button>
                     </div>
                 </div>

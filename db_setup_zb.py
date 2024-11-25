@@ -105,8 +105,6 @@ cursor.execute('''
 ''')
 
 
-
-
 #Ratings Table
 cursor.execute('''
             CREATE TABLE IF NOT EXISTS Ratings (
@@ -115,6 +113,7 @@ cursor.execute('''
                 movie_id INT NOT NULL,
                 rating INT NOT NULL CHECK(rating >= 0 AND rating <= 10),
                 review TEXT,
+                rated_at DATE DEFAULT CURRENT_DATE,
                 FOREIGN KEY (user_id) REFERENCES Users(user_id),
                 FOREIGN KEY (movie_id) REFERENCES Movies(movie_id)
 );
@@ -147,9 +146,9 @@ cursor.execute('''
             )
 ''')
 
-#To be watched table
+#WatchLater table
 cursor.execute('''
-            CREATE TABLE IF NOT EXISTS To_Be_Watched (
+            CREATE TABLE IF NOT EXISTS WatchLater (
                 user_id INT NOT NULL,
                 movie_id INT NOT NULL,
                 added_at DATE DEFAULT CURRENT_DATE,

@@ -10,33 +10,42 @@
     let type = "";
     let query = "";
     let movies = [];
+    let id= "";
     let error = "";
     let sidebar = false;
   
     // Extract query parameter on mount
     onMount(async () => {
-  redirectToRegisterIfNotAuthenticated();
-  const urlParams = new URLSearchParams(window.location.search);
-  query = urlParams.get("query"); // Assign to existing `let query`
-  type = urlParams.get("type");  // Assign to existing `let type`
+        redirectToRegisterIfNotAuthenticated();
+        const urlParams = new URLSearchParams(window.location.search);
+        query = urlParams.get("query"); // Assign to existing `let query`
+        type = urlParams.get("type");  // Assign to existing `let type`
+        id = urlParams.get("id");      // Assign to the new `let id`
+        try {
+            let response;
+            if (query) {
+                // Name-based search
+                response = await fetch(`http://localhost:5000/api/search_${type}?query=${encodeURIComponent(query)}&limit=10`);
+            } else if (id) {
+                // ID-based search
+                response = await fetch(`http://localhost:5000/api/search_${type}?${type}_id=${encodeURIComponent(id)}&limit=10`);
+            } else {
+                error = "No valid search parameters provided.";
+                return;
+            }
 
-  if (query) {
-    try {
-      const response = await fetch(`http://localhost:5000/api/search_${type}?query=${encodeURIComponent(query)}&limit=10`);
-      const data = await response.json();
+            if (!response.ok) {
+                error = "Failed to fetch movies.";
+                return;
+            }
 
-      if (response.ok) {
-        movies = data.movies;
-      } else {
-        error = data.error || "Failed to fetch movies.";
-      }
-    } catch (err) {
-      error = "An error occurred while fetching movies.";
-      console.error(err);
-    }
-  }
-});
-
+            const data = await response.json();
+            movies = data.movies || [];
+            } catch (err) {
+              console.error("Error fetching movies:", err);
+              error = "An error occurred while fetching movies.";
+            } 
+    });
   </script>
   
   <div class="wrapper">
