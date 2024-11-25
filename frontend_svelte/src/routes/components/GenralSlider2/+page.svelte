@@ -1,29 +1,33 @@
 <script>
     import { onMount } from "svelte";
     import MovieCard from "../Slider/movie_card.svelte";
-    export let limit;
-    export let genre;
+  
+    export let type;            
+    export let value;
+    export let limit;      
     export let heading;
-    let movies = [];
-    let currentIndex = 0;
+    let movies = [];      
+    let currentIndex = 0; 
+    
+    // On component mount, fetch movies from the API
     onMount(async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:5000/api/genre?genre=${genre}&limit=${limit}`);
+        const response = await fetch(`http://127.0.0.1:5000/api/${type}?actor_id=${value}&limit=${limit}`);
         if (!response.ok) {
-          console.error("Failed to fetch latest movies:", response.status);
+          console.error("Failed to fetch actor movies:", response.status);
           return;
         }
         const data = await response.json();
-        movies = data.movies || [];
+        movies = data.data || [];
       } catch (error) {
-        console.error("Error fetching latest movies:", error);
+        console.error("Error fetching actor movies:", error);
       }
     });
-  
-    // Max index to slide within range
+    
+    // Calculate the maximum index for the slider range
     const maxIndex = () => Math.max(0, movies.length - 8);
-  
-    // Handlers for navigation
+    
+    // Handlers for navigation (next and previous)
     function nextSlide() {
       if (currentIndex < maxIndex()) {
         currentIndex += 1;
@@ -90,7 +94,7 @@
     }
   
     .view-all-btn:hover {
-      color: #06eE45; /* Brighter red on hover */
+      color: #06eE45; /* Brighter green on hover */
     }
   
     .slider-wrapper {

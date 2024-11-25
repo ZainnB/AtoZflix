@@ -294,13 +294,5 @@ def main():
 def home():
     return 'Welcome to the Movies API!'
 
-@app.route('/movies')
-def crew():
-    conn = sqlite3.connect('movies.db')
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM Movies LIMIT 10;')
-    genres = cursor.fetchall()
-    conn.close()
-    return jsonify(genres)
 if __name__ == '__main__':
     app.run(debug=True)

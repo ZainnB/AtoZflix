@@ -1,7 +1,7 @@
 <script>
     import { redirectToRegisterIfNotAuthenticated } from "../../../utils/auth.js";
   import MovieCard from "../Slider/movie_card.svelte";
-  import GenreSlider from "../GenreSlider/+page.svelte";
+  import GenreSlider from "../GenralSlider/+page.svelte";
   import Navbar from "../Home/Navbar2.svelte";
   import SideBar from "../Home/SideBar.svelte";
   import Footer from "../Register/Footer1.svelte";
@@ -72,7 +72,7 @@
               </div>
           {:else}
               {#each genre_list as genre}
-                  <GenreSlider genre={genre} limit={10} heading={genre} />
+                  <GenreSlider type="genre" value={genre} limit={10} heading={genre} />
               {/each}
           {/if}
       </div>

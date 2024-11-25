@@ -1,6 +1,6 @@
-<!-- <script>
+<script>
     import MovieCard from "../Slider/movie_card.svelte";
-    import CountrySlider from "../GenreSlider/+page.svelte";
+    import CountrySlider from "../GenralSlider/+page.svelte";
     import Navbar from "../Home/Navbar2.svelte";
     import SideBar from "../Home/SideBar.svelte";
     import Footer from "../Register/Footer1.svelte";
@@ -50,17 +50,14 @@
         <SideBar bind:open={sidebar} />
     </div>
     <div class="country_container">
-        country List Section -->
-        <!-- <div class="country_buttons">
+         <div class="country_buttons">
             {#each country_list as country}
                 <button on:click={() => selectcountry(country)} class:selected={selectedcountry === country}>
                     {country}
                 </button>
             {/each}
-        </div>
-   -->
-        <!-- Movie Section -->
-        <!-- <div class="movie_container">
+        </div> 
+         <div class="movie_container">
           <h1> {selectedcountry} </h1>
             {#if movies.length > 0}
                 <div class="movies-grid">
@@ -104,23 +101,32 @@
     }
   
     .country_container {
-        display: grid;
-        grid-template-columns: 15% 85%; /* Make the country column thinner */
-        height: calc(100vh - 70px); /* Adjust height to exclude navbar height */
-        margin-top: 70px;
-    }
-  
-    .country_buttons {
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        padding: 1rem 0.5rem;
-        background-color: #141414;
-        color: #fff;
-        overflow-y: auto;
-        scrollbar-width: thin; /* For Firefox */
-        scrollbar-color: #064E45 #121212;
-    }
+      display: grid;
+      grid-template-columns: 15% 85%; /* Matches genre_container */
+      height: calc(100vh - 70px); /* Adjust for navbar height */
+      margin-top: 70px;
+  }
+
+  .country_buttons {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      padding: 1rem 0.5rem;
+      background-color: #141414;
+      color: #fff;
+      overflow-y: auto;
+      scrollbar-width: thin; /* For Firefox */
+      scrollbar-color: #064E45 #121212;
+  }
+
+  .movie_container {
+      padding: 1rem;
+      background-color: #141414;
+      color: #fff;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #064E45 #121212;
+  }
   
     .country_buttons::-webkit-scrollbar {
         width: 8px;
@@ -158,15 +164,16 @@
         border-color: #098577;
         color: #fff;
     }
-  
+
     .movie_container {
-        padding: 1rem;
-        background-color: #141414;
-        color: #fff;
-        overflow-y: auto;
-        scrollbar-width: thin;
-        scrollbar-color: #064E45 #121212;
+      padding: 1rem;
+      background-color: #141414;
+      color: #fff;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #064E45 #121212;
     }
+  
   
     .movies-grid {
         display: grid;
@@ -193,5 +200,5 @@
             grid-template-columns: 1fr;
             grid-template-rows: auto 1fr;
         }
-    } -->
-  <!-- </style>-->
+    }
+</style>

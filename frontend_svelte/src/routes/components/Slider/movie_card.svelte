@@ -1,6 +1,6 @@
 <script>
   export let poster_path;
-  export let movie_id; // Accept movie_id as a prop
+  export let movie_id;
 </script>
 
 <a href={`/components/MovieDetail?movie_id=${movie_id}`} class="movie-link">
