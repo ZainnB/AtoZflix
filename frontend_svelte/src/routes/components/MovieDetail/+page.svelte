@@ -66,8 +66,8 @@
         const url = isFavourite
             ? `http://127.0.0.1:5000/api/remove_favourite`
             : `http://127.0.0.1:5000/api/add_favourite`;
-
-        const response = await fetch(url, {
+            console.log(user_id,movie_id)
+            const response = await fetch(url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -146,7 +146,11 @@
                         >
                             {isFavourite ? "Remove from Favourites" : "Add to Favourites"}
                         </button>
-                        <button class="to-watch-btn" on:click={toggleWatchlist}>
+                        <button
+                            class="to-watch-btn"
+                            class:is-in-watchlist={isInWatchlist}
+                            on:click={toggleWatchlist}
+                        >
                             {isInWatchlist ? "Remove from Watch Later" : "Add to Watch Later"}
                         </button>
                         
@@ -255,47 +259,6 @@
         transition: all 0.3s ease;
     }
 
-    .favourites-btn {
-        background-color: #098577;
-        color: white;
-    }
-
-    .favourites-btn:disabled {
-        background-color: #555;
-        cursor: not-allowed;
-    }
-
-    .favourites-btn:hover {
-        background-color: #064e45;
-    }
-
-    .to-watch-btn {
-        background-color: #064e45;
-        color: white;
-    }
-
-    .to-watch-btn:hover {
-        background-color: #098577;
-    }
-
-    .rate-btn {
-        background-color: #333;
-        color: white;
-    }
-
-    .rate-btn:hover {
-        background-color: #555;
-    }
-    .action-buttons button {
-        padding: 12px 20px;
-        border-radius: 5px;
-        font-size: 1rem;
-        margin-right: 10px;
-        cursor: pointer;
-        border: none;
-        transition: all 0.3s ease;
-    }
-
     /* Default button styles */
     .favourites-btn {
         background-color: #333;
@@ -323,15 +286,34 @@
         background-color: #b71c1c; /* Darker red */
     }
 
+    /* Default Watch Later button styles */
     .to-watch-btn {
-        background-color: #098577;
+        background-color: #333;
         color: white;
+        border: 2px solid transparent;
     }
-
-    .to-watch-btn:hover {
-        background-color: #064e45;
+    
+    /* Add-to-Watchlist style */
+    .to-watch-btn:not(.is-in-watchlist) {
+        background-color: #098577; /* Green for adding */
     }
-
+    
+    /* Remove-from-Watchlist style */
+    .to-watch-btn.is-in-watchlist {
+        background-color: #e50914; /* Netflix red for removing */
+        border-color: #b71c1c; /* Red border for distinction */
+    }
+    
+    /* Hover effects */
+    .to-watch-btn:hover:not(.is-in-watchlist) {
+        background-color: #064e45; /* Darker green */
+    }
+    
+    .to-watch-btn:hover.is-in-watchlist {
+        background-color: #b71c1c; /* Darker red */
+    }
+    
+    
     .rate-btn {
         background-color: #333;
         color: white;

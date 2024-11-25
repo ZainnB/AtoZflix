@@ -820,7 +820,6 @@ def get_favourites():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-
 @app.route('/api/get_all_users', methods=['GET'])
 def getAllUsers():
     try:
@@ -1060,68 +1059,15 @@ def check_watchlist():
 
     try:
         cursor.execute('''
-            SELECT COUNT(*) as count FROM WatchLater
-             WHERE user_id = ? AND movie_id = ?;
+            SELECT COUNT(*) AS count FROM WatchLater
+            WHERE user_id = ? AND movie_id = ?
         ''', (user_id, movie_id))
         result = cursor.fetchone()
-        print(result)
-
-        # Debugging: print query result
-        print(f"Check Watchlist Query Result: {result}")
-
-        is_in_watchlist = result['count'] > 0
+        is_in_watchlist = result['count']>0
         return jsonify({"is_in_watchlist": is_in_watchlist}), 200
-
     except Exception as e:
-        # Improved error logging for better visibility
         print(f"Error checking watchlist: {e}")
         return jsonify({"error": "Failed to check watchlist"}), 500
-
-    finally:
-        conn.close()
-
-@app.route('/api/get_all_watchlist', methods=['GET'])
-def get_all_watchlist():
-    user_id = request.args.get('user_id')
-
-    if not user_id:
-        return jsonify({"error": "user_id is required"}), 400
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    try:
-        # Query to retrieve all movies in the user's watchlist
-        cursor.execute('''
-            SELECT m.movie_id, m.title, m.release_date, m.poster_path, m.overview
-            FROM WatchLater wl
-            JOIN Movies m ON wl.movie_id = m.movie_id
-            WHERE wl.user_id = ?
-            ORDER BY wl.added_at DESC;
-        ''', (user_id,))
-
-        # Fetch all rows from the query
-        watchlist = cursor.fetchall()
-
-        # Transform data into a list of dictionaries for JSON response
-        movies = [
-            {
-                "movie_id": row["movie_id"],
-                "title": row["title"],
-                "release_date": row["release_date"],
-                "poster_path": row["poster_path"],
-                "overview": row["overview"],
-            }
-            for row in watchlist
-        ]
-
-        return jsonify({"watchlist": movies}), 200
-
-    except Exception as e:
-        # Log error and return a 500 response
-        print(f"Error fetching watchlist: {e}")
-        return jsonify({"error": "Failed to fetch watchlist"}), 500
-
     finally:
         conn.close()
 
@@ -1131,4 +1077,3 @@ def home():
     return 'Welcome to the Movies API!'
 if __name__ == "__main__":
     app.run(debug=True)
-
