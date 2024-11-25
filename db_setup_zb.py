@@ -104,8 +104,6 @@ cursor.execute('''
     );
 ''')
 
-
-
 #Ratings Table
 cursor.execute('''
             CREATE TABLE IF NOT EXISTS Ratings (
