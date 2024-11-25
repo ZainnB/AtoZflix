@@ -890,6 +890,22 @@ def get_all_ratings():
     
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+    
+@app.route('/api/get_all_movies', methods=['GET'])
+def get_all_movies():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute('SELECT movie_id,title,release_date,overview FROM Movies')
+        movies =[
+            {"movie_id": row[0], "title": row[1], "release_date": row[2],"overview":row[3]}
+            for row in cursor.fetchall()]
+        return jsonify({"movies": movies}), 200
+    except Exception as e:
+        print(e)
+        return jsonify({"error": "Failed to fetch movies"}), 500
+    finally:
+        conn.close()
 
 @app.route('/api/add_favourite', methods=['POST'])
 def add_to_favorites():
@@ -1122,6 +1138,55 @@ def get_all_watchlist():
         print(f"Error fetching watchlist: {e}")
         return jsonify({"error": "Failed to fetch watchlist"}), 500
 
+    finally:
+        conn.close()
+
+@app.route('/api/delete_user', methods=['DELETE'])
+def delete_user():
+    user_id = request.args.get('user_id')
+    if not user_id:
+        return jsonify({"error": "user_id is required"}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute('DELETE FROM Users WHERE user_id = ?', (user_id,))
+        conn.commit()
+        if cursor.rowcount == 0:
+            return jsonify({"error": "User not found"}), 404
+        return jsonify({"message": "User deleted successfully"}), 200
+    except Exception as e:
+        print(f"Error deleting user: {e}")
+        return jsonify({"error": "Failed to delete user"}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/update_user', methods=['PUT'])
+def update_user():
+    user_id = request.json.get('user_id')
+    username = request.json.get('username')
+    email = request.json.get('email')
+
+    if not user_id or not username or not email:
+        return jsonify({"error": "user_id, username, and email are required"}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute('''
+            UPDATE Users
+            SET username = ?, email = ?
+            WHERE user_id = ?
+        ''', (username, email, user_id))
+        conn.commit()
+        if cursor.rowcount == 0:
+            return jsonify({"error": "User not found"}), 404
+        return jsonify({"message": "User updated successfully"}), 200
+    except Exception as e:
+        print(f"Error updating user: {e}")
+        return jsonify({"error": "Failed to update user"}), 500
     finally:
         conn.close()
 
