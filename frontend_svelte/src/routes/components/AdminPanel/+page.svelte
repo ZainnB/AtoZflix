@@ -143,10 +143,10 @@
                 {#if updateUserData.user_id}
                     <h3>Update User</h3>
                     <form on:submit|preventDefault={updateUser}>
-                        <label>Username:</label>
-                        <input type="text" bind:value={updateUserData.username} />
-                        <label>Email:</label>
-                        <input type="email" bind:value={updateUserData.email} />
+                        <label for="username">Username:</label>
+                        <input id="username" type="text" bind:value={updateUserData.username} />
+                        <label for="email">Email:</label>
+                        <input id="email" type="email" bind:value={updateUserData.email} />
                         <button type="submit">Update</button>
                     </form>
                 {/if}

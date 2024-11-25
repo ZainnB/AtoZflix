@@ -62,7 +62,6 @@ def signin():
     print("Body:", request.data)  # Raw body as bytes
     print("JSON Body:", request.get_json(silent=True))  # Attempt to parse JSON
 
-    # Force JSON parsing if Content-Type is missing
     try:
         data = request.get_json(force=True)
     except Exception as e:
@@ -90,7 +89,12 @@ def signin():
 
     # Validate the user credentials
     if user and user['password'] == password:
-        return jsonify({"user_id": user["user_id"], "success": True, "message": "Login successful"})
+        return jsonify({
+            "user_id": user["user_id"],
+            "role": user["role"],  # Include role in the response
+            "success": True,
+            "message": "Login successful"
+        })
     else:
         return jsonify({"success": False, "message": "Invalid username or password"}), 401
 
@@ -772,137 +776,42 @@ def rate_movie():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-#favorites
+# Favorites API Endpoints
 @app.route('/api/get_favourites', methods=['GET'])
 def get_favourites():
-    user_id = request.args.get('user_id')  # Get user_id from query parameters
-    if not user_id:
-        return jsonify({"status": "error", "message": "User ID is required"}), 400
-
+    user_id = request.args.get('user_id')
+    if not user_id or not user_id.isdigit():
+        return jsonify({"status": "error", "message": "Valid User ID is required"}), 400
+    
+    user_id = int(user_id)
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-
-        # Query to fetch favourites, movie details, and rating details
         cursor.execute("""
             SELECT 
                 f.movie_id,
                 m.poster_path,
-                r.rating,
-                r.review,
-                r.rated_at,
                 f.added_at
             FROM Favorites f
             JOIN Movies m ON f.movie_id = m.movie_id
-            JOIN Ratings r ON f.rating_id = r.rating_id
             WHERE f.user_id = ?
             ORDER BY f.added_at DESC
         """, (user_id,))
 
         favourites = cursor.fetchall()
-        conn.close()
-
-        # Format the results as a list of dictionaries
         result = [
             {
                 "movie_id": fav[0],
                 "poster_path": fav[1],
-                "rating": fav[2],
-                "review": fav[3],
-                "rated_at": fav[4],
-                "added_at": fav[5]
+                "added_at": fav[2]
             }
             for fav in favourites
         ]
-
         return jsonify({"status": "success", "favourites": result}), 200
 
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-@app.route('/api/get_all_users', methods=['GET'])
-def getAllUsers():
-    try:
-        # Connect to the database
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        # Query to fetch all users
-        query = "SELECT user_id, email, username FROM Users"
-        cursor.execute(query)
-
-        # Fetch all results as a list of dictionaries
-        users = [
-            {"user_id": row[0], "email": row[1], "username": row[2]}
-            for row in cursor.fetchall()
-        ]
-
-        # Close the connection
-        conn.close()
-
-        # Return the response
-        return jsonify({"status": "success", "users": users})
-
-    except Exception as e:
-        # Handle errors
-        return jsonify({"status": "error", "message": str(e)}), 500
-    
-@app.route('/api/get_all_ratings', methods=['GET'])
-def get_all_ratings():
-    try:
-        # Connect to the database
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        # SQL query to get all ratings along with user and movie details
-        query = '''
-            SELECT r.rating_id, r.rating, r.review, r.user_id, r.movie_id, u.username, m.title AS movie_title
-            FROM Ratings r
-            JOIN Users u ON r.user_id = u.user_id
-            JOIN Movies m ON r.movie_id = m.movie_id'''  
-        
-        # Execute the query
-        cursor.execute(query)
-        ratings = cursor.fetchall()
-
-        # Check if ratings are found
-        if ratings:
-            # Convert ratings to a list of dictionaries
-            ratings_list = []
-            for row in ratings:
-                ratings_list.append({
-                    "rating_id": row["rating_id"],
-                    "rating": row["rating"],
-                    "review": row["review"],
-                    "user_id": row["user_id"],
-                    "username": row["username"],
-                    "movie_id": row["movie_id"],
-                    "movie_title": row["movie_title"]
-                })
-            
-            # Close the connection
-            conn.close()
-
-            return jsonify({"status": "success", "ratings": ratings_list}), 200
-        else:
-            return jsonify({"status": "success", "message": "No ratings found"}), 404
-    
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
-    
-@app.route('/api/get_all_movies', methods=['GET'])
-def get_all_movies():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        cursor.execute('SELECT movie_id,title,release_date,overview FROM Movies')
-        movies =[
-            {"movie_id": row[0], "title": row[1], "release_date": row[2],"overview":row[3]}
-            for row in cursor.fetchall()]
-        return jsonify({"movies": movies}), 200
-    except Exception as e:
-        print(e)
-        return jsonify({"error": "Failed to fetch movies"}), 500
     finally:
         conn.close()
 
@@ -996,17 +905,42 @@ def check_favorite():
         return jsonify({"success": False, "message": str(e)}), 500
 
 
-@app.route('/api/get_movie_count', methods=['GET'])
-def get_movie_count():
+# Watchlist/WatchLater API Endpoints
+@app.route('/api/get_watchlist', methods=['GET'])
+def get_watchlist():
+    user_id = request.args.get('user_id')
+    if not user_id or not user_id.isdigit():
+        return jsonify({"status": "error", "message": "Valid User ID is required"}), 400
+
+    user_id = int(user_id)
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT COUNT(*) FROM Movies")
-        count = cursor.fetchone()[0]
-        conn.close()
-        return jsonify({"status": "success", "count": count}), 200
+        cursor.execute('''
+            SELECT
+                w.movie_id,
+                m.poster_path,
+                w.added_at
+            FROM WatchLater w
+            JOIN Movies m ON w.movie_id = m.movie_id
+            WHERE w.user_id = ?
+            ORDER BY w.added_at DESC
+        ''', (user_id,))
+        watchlist = cursor.fetchall()
+        result = [
+            {
+                "movie_id": movie[0],
+                "poster_path": movie[1],
+                "added_at": movie[2]
+            }
+            for movie in watchlist
+        ]
+        return jsonify({"status": "success", "watchlist": result}), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        conn.close()
 
 
 @app.route('/api/add_to_watchlist', methods=['POST'])
@@ -1087,6 +1021,93 @@ def check_watchlist():
     finally:
         conn.close()
 
+
+@app.route('/api/get_all_users', methods=['GET'])
+def getAllUsers():
+    try:
+        # Connect to the database
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Query to fetch all users
+        query = "SELECT user_id, email, username FROM Users"
+        cursor.execute(query)
+
+        # Fetch all results as a list of dictionaries
+        users = [
+            {"user_id": row[0], "email": row[1], "username": row[2]}
+            for row in cursor.fetchall()
+        ]
+
+        # Close the connection
+        conn.close()
+
+        # Return the response
+        return jsonify({"status": "success", "users": users})
+
+    except Exception as e:
+        # Handle errors
+        return jsonify({"status": "error", "message": str(e)}), 500
+    
+@app.route('/api/get_all_ratings', methods=['GET'])
+def get_all_ratings():
+    try:
+        # Connect to the database
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # SQL query to get all ratings along with user and movie details
+        query = '''
+            SELECT r.rating_id, r.rating, r.review, r.user_id, r.movie_id, u.username, m.title AS movie_title
+            FROM Ratings r
+            JOIN Users u ON r.user_id = u.user_id
+            JOIN Movies m ON r.movie_id = m.movie_id'''  
+        
+        # Execute the query
+        cursor.execute(query)
+        ratings = cursor.fetchall()
+
+        # Check if ratings are found
+        if ratings:
+            # Convert ratings to a list of dictionaries
+            ratings_list = []
+            for row in ratings:
+                ratings_list.append({
+                    "rating_id": row["rating_id"],
+                    "rating": row["rating"],
+                    "review": row["review"],
+                    "user_id": row["user_id"],
+                    "username": row["username"],
+                    "movie_id": row["movie_id"],
+                    "movie_title": row["movie_title"]
+                })
+            
+            # Close the connection
+            conn.close()
+
+            return jsonify({"status": "success", "ratings": ratings_list}), 200
+        else:
+            return jsonify({"status": "success", "message": "No ratings found"}), 404
+    
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    
+@app.route('/api/get_all_movies', methods=['GET'])
+def get_all_movies():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute('SELECT movie_id,title,release_date,overview FROM Movies')
+        movies =[
+            {"movie_id": row[0], "title": row[1], "release_date": row[2],"overview":row[3]}
+            for row in cursor.fetchall()]
+        return jsonify({"movies": movies}), 200
+    except Exception as e:
+        print(e)
+        return jsonify({"error": "Failed to fetch movies"}), 500
+    finally:
+        conn.close()
+
 @app.route('/api/delete_user', methods=['DELETE'])
 def delete_user():
     user_id = request.args.get('user_id')
@@ -1135,6 +1156,18 @@ def update_user():
         return jsonify({"error": "Failed to update user"}), 500
     finally:
         conn.close()
+
+@app.route('/api/get_movie_count', methods=['GET'])
+def get_movie_count():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM Movies")
+        count = cursor.fetchone()[0]
+        conn.close()
+        return jsonify({"status": "success", "count": count}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 
 @app.route('/')

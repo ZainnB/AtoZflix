@@ -100,7 +100,8 @@ cursor.execute('''
         user_id INTEGER PRIMARY KEY AUTOINCREMENT,
         email VARCHAR(255) NOT NULL UNIQUE CHECK(email LIKE '%_@__%.__%'),
         username VARCHAR(255) NOT NULL,
-        password VARCHAR(255) NOT NULL
+        password VARCHAR(255) NOT NULL,
+        role VARCHAR(255) NOT NULL DEFAULT 'user' CHECK(role IN ('user', 'admin'))
     );
 ''')
 

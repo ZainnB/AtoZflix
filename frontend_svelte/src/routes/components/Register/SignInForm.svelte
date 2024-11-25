@@ -1,39 +1,45 @@
 <script>
-    export let onClose; // Function to close the form
-    let usernameOrEmail = ""; // Variable to hold username or email
-    let password = "";
-  
-    const handleSignIn = async () => {
-  console.log("Username or Email:", usernameOrEmail); // Debug input values
-  console.log("Password:", password);
+  export let onClose; // Function to close the form
+  let usernameOrEmail = ""; // Variable to hold username or email
+  let password = "";
 
-  const response = await fetch("http://127.0.0.1:5000/api/signin", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username: usernameOrEmail, password }),
-  });
+  const handleSignIn = async () => {
+      console.log("Username or Email:", usernameOrEmail); // Debug input values
+      console.log("Password:", password);
 
-  const data = await response.json();
-  console.log("Response from Backend:", data); // Debug backend response
-  console.log(data)
-  if (data.success) {
-    alert("Login successful!");
+      const response = await fetch("http://127.0.0.1:5000/api/signin", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: usernameOrEmail, password }),
+      });
 
-    // Save credentials to localStorage
-    localStorage.setItem("user", JSON.stringify({
-      userId:data.user_id,
-      username: usernameOrEmail
-    }));
+      const data = await response.json();
 
-    // Redirect to home
-    window.location.href = "./Home";
-  } else {
-    alert(data.message || "Invalid credentials!");
-  }
-};
+      if (data.success) {
+          alert("Login successful!");
 
-  </script>
-  
+          // Save user data to localStorage
+          localStorage.setItem(
+              "user",
+              JSON.stringify({
+                  userId: data.user_id,
+                  username: usernameOrEmail,
+                  role: data.role, // Save role
+              })
+          );
+
+          // Redirect based on role
+          if (data.role === "admin") {
+              window.location.href = "./AdminPanel";
+          } else {
+              window.location.href = "./Home";
+          }
+      } else {
+          alert(data.message || "Invalid credentials!");
+      }
+  };
+</script>
+
   <div class="overlay">
     <div class="form-container">
       <button class="close-btn" on:click={onClose}>X</button>

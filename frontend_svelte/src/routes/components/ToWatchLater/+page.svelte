@@ -8,7 +8,7 @@
     import MovieCard from '../Slider/movie_card.svelte';
 
     let user_id = null;
-    let favourites = [];
+    let watchlist = [];
     let isLoading = true;
     let error = '';
     let sidebar = false;
@@ -18,12 +18,12 @@
         redirectToRegisterIfNotAuthenticated();
         user_id = JSON.parse(localStorage.getItem("user")).userId;
 
-        // Fetch movie details
+        // Fetch watchlist details
         try {
-            const response = await fetch(`http://127.0.0.1:5000/api/get_favourites?user_id=${user_id}`);
-            if (!response.ok) throw new Error("Failed to fetch favourites");
+            const response = await fetch(`http://127.0.0.1:5000/api/get_watchlist?user_id=${user_id}`);
+            if (!response.ok) throw new Error("Failed to fetch watchlist");
             const data = await response.json();
-            favourites = data.favourites || [];
+            watchlist = data.watchlist || [];
         } catch (err) {
             error = err.message;
         } finally {
@@ -31,12 +31,12 @@
         }
     });
 
-    async function fetchFavourites() {
+    async function fetchWatchlist() {
         try {
-            const response = await fetch(`http://127.0.0.1:5000/api/get_favourites?user_id=${user_id}`);
-            if (!response.ok) throw new Error("Failed to fetch favourites");
+            const response = await fetch(`http://127.0.0.1:5000/api/get_watchlist?user_id=${user_id}`);
+            if (!response.ok) throw new Error("Failed to fetch watchlist");
             const data = await response.json();
-            favourites = data.favourites || [];
+            watchlist = data.watchlist || [];
         } catch (err) {
             error = err.message;
         } finally {
@@ -44,27 +44,25 @@
         }
     }
 
-    // Remove a favourite movie
-    async function removeFavourite(movieId) {
+    // Remove a movie from the watchlist
+    async function removeFromWatchlist(movieId) {
         try {
-            const url = `http://127.0.0.1:5000/api/remove_favourite`;
-            console.log(user_id,movieId)
+            const url = `http://127.0.0.1:5000/api/remove_from_watchlist`;
+            console.log(user_id, movieId);
             const response = await fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ user_id, movie_id: movieId  }),
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ user_id, movie_id: movieId }),
             });
             if (!response.ok) throw new Error("Failed to remove the movie");
-            await fetchFavourites();
-            } catch (e) {
+            await fetchWatchlist();
+        } catch (e) {
             alert(e.message || 'An error occurred while removing the movie.');
-            }
+        }
     }
-
 </script>
-
 
 <div class="wrapper">
     <div class="navbar-wrapper">
@@ -74,20 +72,20 @@
         <SideBar bind:open={sidebar} />
     </div>
     
-    <div class="favourites-wrapper">
+    <div class="watchlist-wrapper">
         {#if isLoading}
-            <p>Loading your favourites...</p>
+            <p>Loading your watchlist...</p>
         {:else if error}
             <p>{error}</p>
-        {:else if favourites.length === 0}
-            <p>You have no favourites yet.</p>
+        {:else if watchlist.length === 0}
+            <p>Your WatchLater list is empty.</p>
         {:else}
-            {#each favourites as movie}
+            {#each watchlist as movie}
                 <div class="movie-card">
                     <MovieCard poster_path={movie.poster_path} movie_id={movie.movie_id} />
                     <p class="added-at">Added on: {new Date(movie.added_at).toLocaleDateString()}</p>
-                    <button class="remove-button" on:click={() => removeFavourite(movie.movie_id)}>
-                        Remove from Favourites
+                    <button class="remove-button" on:click={() => removeFromWatchlist(movie.movie_id)}>
+                        Remove from WatchLater
                     </button>
                 </div>
             {/each}
@@ -98,68 +96,68 @@
 </div>
 
 <style>
-
 .wrapper {
     position: relative;
     min-height: 100vh;
     background-color: #121212;
     font-family: 'Netflix Sans', 'Helvetica Neue', 'Segoe UI', 'Roboto', 'Ubuntu', sans-serif;
     overflow: hidden;
-  }
+}
 
-  .navbar-wrapper {
+.navbar-wrapper {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     z-index: 10;
-  }
+}
 
-  .sidebar-wrapper {
+.sidebar-wrapper {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    }
-    .favourites-wrapper {
-        display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 1rem;
-        padding: 1rem;
-        margin-top: 80px;
-    }
+}
 
-    .favourites-wrapper p {
+.watchlist-wrapper {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1rem;
+    padding: 1rem;
+    margin-top: 80px;
+}
+
+.watchlist-wrapper p {
         margin-top: 1rem;
         color: #ffffff;
         text-align: center;
     }
 
-    .movie-card {
-        margin-bottom: 1rem;
-        width: 100%;
-        max-width: 300px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
+.movie-card {
+    margin-bottom: 1rem;
+    width: 100%;
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
-    .added-at {
-        font-size: 0.8rem;
-        color: #888;
-    }
+.added-at {
+    font-size: 0.8rem;
+    color: #888;
+}
 
-    .remove-button {
-        margin-top: 0.5rem;
-        padding: 0.5rem 1rem;
-        background-color: #ff4d4f;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
+.remove-button {
+    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: #ff4d4f;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
 
-    .remove-button:hover {
-        background-color: #ff1a1d;
-    }
+.remove-button:hover {
+    background-color: #ff1a1d;
+}
 </style>
