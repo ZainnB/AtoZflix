@@ -449,7 +449,7 @@ def movie_details():
     FROM Movies m
     WHERE m.movie_id = ?
     """
-    
+
     try:
         cursor.execute(query, (movie_id,))
         movie = cursor.fetchone()
@@ -533,6 +533,7 @@ def getAllUsers():
     except Exception as e:
         # Handle errors
         return jsonify({"status": "error", "message": str(e)}), 500
+    
 @app.route('/api/get_all_ratings', methods=['GET'])
 def get_all_ratings():
     try:
@@ -545,8 +546,7 @@ def get_all_ratings():
             SELECT r.rating_id, r.rating, r.review, r.user_id, r.movie_id, u.username, m.title AS movie_title
             FROM Ratings r
             JOIN Users u ON r.user_id = u.user_id
-            JOIN Movies m ON r.movie_id = m.movie_id
-        '''
+            JOIN Movies m ON r.movie_id = m.movie_id'''  
         
         # Execute the query
         cursor.execute(query)
@@ -576,6 +576,95 @@ def get_all_ratings():
     
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/add_favourite', methods=['POST'])
+def add_to_favorites():
+    try:
+        data = request.get_json()
+        app.logger.info(f"Received data: {data}")
+
+        user_id = data.get('user_id')
+        movie_id = data.get('movie_id')
+
+        if not user_id or not movie_id:
+            return jsonify({"message": "user_id and movie_id are required"}), 400
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute('''
+            SELECT COUNT(*) FROM Favorites WHERE user_id = ? AND movie_id = ?
+        ''', (user_id, movie_id))
+        exists = cursor.fetchone()[0]
+
+        if exists:
+            return jsonify({"success": False, "message": "Movie is already in favorites"}), 409
+
+        # Insert the favorite
+        cursor.execute('''
+            INSERT INTO Favorites (user_id, movie_id) 
+            VALUES (?, ?)
+        ''', (user_id, movie_id))
+        conn.commit()
+        conn.close()
+
+        app.logger.info(f"Movie {movie_id} added to user {user_id}'s favorites.")
+        return jsonify({"success": True, "message": "Movie added to favorites"}), 200
+
+    except sqlite3.IntegrityError as e:
+        return jsonify({"success": False, "message": "Integrity error: " + str(e)}), 409
+
+    except Exception as e:
+        app.logger.error(f"Error: {str(e)}")
+        return jsonify({"success": False, "message": str(e)}), 500
+ 
+
+@app.route('/api/remove_favorite', methods=['POST'])
+def remove_from_favorites():
+    try:
+        data = request.get_json()
+        user_id = data.get('user_id')
+        movie_id = data.get('movie_id')
+
+        if not user_id or not movie_id:
+            return jsonify({"message": "user_id and movie_id are required"}), 400
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            DELETE FROM Favorites WHERE user_id = ? AND movie_id = ?
+        ''', (user_id, movie_id))
+        conn.commit()
+        conn.close()
+
+        return jsonify({"success": True, "message": "Movie removed from favorites"}), 200
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+    
+@app.route('/api/check_favourite', methods=['GET'])
+def check_favorite():
+    try:
+        user_id = request.args.get('user_id')
+        movie_id = request.args.get('movie_id')
+        if not user_id or not movie_id:
+            return jsonify({"message": "user_id and movie_id are required"}), 400
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT COUNT(*) as count 
+            FROM Favorites 
+            WHERE user_id = ? AND movie_id = ?
+        ''', (user_id, movie_id))
+        result = cursor.fetchone()
+        conn.close()
+        if result is None:
+            is_favourite = False
+        else:
+            is_favourite = result[0] > 0
+        return jsonify({"is_favourite": is_favourite}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
 
 
 if __name__ == "__main__":

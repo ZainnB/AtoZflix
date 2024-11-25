@@ -12,13 +12,17 @@
     let movie = null;
     let error = null;
     let sidebar = false;
+    let isFavourite = false; // Tracks if movie is in favourites
+    let user_id;
 
     // Lifecycle: On component mount
     onMount(async () => {
         redirectToRegisterIfNotAuthenticated();
-        // Parse query parameters
+        user_id = JSON.parse(localStorage.getItem("user")).userId;
         const params = new URLSearchParams(window.location.search);
+        console.log(user_id)
         movie_id = params.get("movie_id");
+        console.log(movie_id)
         if (!movie_id) {
             error = "No movie ID provided";
             return;
@@ -26,36 +30,54 @@
 
         // Fetch movie details
         try {
-            const response = await fetch(`http://127.0.0.1:5000/api/movie_details?movie_id=${movie_id}`);
+            const response = await fetch(
+                `http://127.0.0.1:5000/api/movie_details?movie_id=${movie_id}`,
+            );
             if (!response.ok) throw new Error("Failed to fetch movie details");
             const data = await response.json();
             movie = data.movie;
+
+            // Check if movie is already in user's favourites
+            console.log(user_id,movie_id)
+            const favResponse = await fetch(
+                
+                `http://127.0.0.1:5000/api/check_favourite?user_id=${user_id}&movie_id=${movie_id}`,
+            );
+            if (favResponse.ok) {
+                const favData = await favResponse.json();
+                console.log(favData)
+                isFavourite = favData.is_favourite;
+            }
         } catch (err) {
             error = err.message;
         }
     });
-
-    // Open the rating modal
     const rateMovie = () => {
         isRatingOpen = true;
     };
+    const toggleFavourite = async () => {
+        const url = isFavourite
+            ? `http://127.0.0.1:5000/api/remove_favorite`
+            : `http://127.0.0.1:5000/api/add_favourite`;
+            console.log(user_id,movie_id)
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ user_id, movie_id }),
+        });
 
-    // Close the rating modal
-    const closeRating = () => {
-        isRatingOpen = false;
-    };
-
-    // Submit the rating
-    const submitRating = ({ rating, feedback }) => {
-        console.log(`Rating: ${rating}, Feedback: ${feedback}`);
-        isRatingOpen = false;
-        // Additional logic to send rating data to the backend can be added here
+        if (response.ok) {
+            isFavourite = !isFavourite; // Toggle the favourite status
+        } else {
+            console.error("Failed to update favourite status");
+        }
     };
 </script>
 
 <!-- Modal for rating -->
-<RatingModal bind:show={isRatingOpen} movie_id={movie_id} />
-
+<RatingModal bind:show={isRatingOpen} {movie_id} />
 <div class="movie-details">
     <div class="navbar-wrapper">
         <Navbar />
@@ -67,26 +89,40 @@
         <p class="error">{error}</p>
     {:else if movie}
         <div class="movie-header">
-            <div 
-                class="backdrop" 
-                style="background-image: url('https://image.tmdb.org/t/p/original{movie.backdrop_path}')">
-            </div>
+            <div
+                class="backdrop"
+                style="background-image: url('https://image.tmdb.org/t/p/original{movie.backdrop_path}')"
+            ></div>
             <div class="backdrop-overlay"></div>
             <div class="movie-info">
-                <img 
-                    src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} 
-                    alt="{movie.title}" 
-                    class="movie-poster" />
+                <img
+                    src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                    alt={movie.title}
+                    class="movie-poster"
+                />
                 <div class="movie-details-text">
                     <h1>{movie.title}</h1>
                     <p><strong>Release Date:</strong> {movie.release_date}</p>
                     <p><strong>Runtime:</strong> {movie.runtime} minutes</p>
                     <p><strong>Overview:</strong> {movie.overview}</p>
-                    <p><strong>Rating:</strong> {movie.rating_avg} ({movie.rating_count} votes)</p>
+                    <p>
+                        <strong>Rating:</strong>
+                        {movie.rating_avg} ({movie.rating_count} votes)
+                    </p>
                     <div class="action-buttons">
-                        <button class="favourites-btn">Add to Favourites</button>
+                        <button
+                            class="favourites-btn"
+                            on:click={toggleFavourite}
+                            disabled={isFavourite}
+                        >
+                            {isFavourite
+                                ? "Added to Favourites"
+                                : "Add to Favourites"}
+                        </button>
                         <button class="to-watch-btn">Add to Watchlist</button>
-                        <button class="rate-btn" on:click={rateMovie}>Give Rating</button>
+                        <button class="rate-btn" on:click={rateMovie}
+                            >Give Rating</button
+                        >
                     </div>
                 </div>
             </div>
@@ -97,6 +133,7 @@
     <Line />
     <Footer />
 </div>
+
 <style>
     .movie-details {
         padding: 20px;
@@ -105,16 +142,17 @@
         min-height: 100vh;
         position: relative;
         overflow: hidden;
-        font-family: 'Netflix Sans', 'Helvetica Neue', 'Segoe UI', 'Roboto', 'Ubuntu', sans-serif;
+        font-family: "Netflix Sans", "Helvetica Neue", "Segoe UI", "Roboto",
+            "Ubuntu", sans-serif;
     }
 
     .navbar-wrapper {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      z-index: 10;
-  }
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 10;
+    }
 
     .sidebar-wrapper {
         position: absolute;
@@ -138,7 +176,7 @@
         bottom: 0;
         background-size: cover;
         background-position: center;
-        z-index: 0; /* Ensure it's below the overlay and movie info */
+        z-index: 0;
     }
 
     .backdrop-overlay {
@@ -147,15 +185,15 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 0, 0, 0.8); /* Darker background with opacity */
-        z-index: 1; /* Ensure it sits on top of the backdrop */
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1;
     }
 
     .movie-info {
         display: flex;
         flex-direction: column;
         gap: 15px;
-        z-index: 2; /* Ensure movie info is above both the backdrop and overlay */
+        z-index: 2;
         position: relative;
         margin-top: 3%;
     }
@@ -194,12 +232,17 @@
         color: white;
     }
 
+    .favourites-btn:disabled {
+        background-color: #555;
+        cursor: not-allowed;
+    }
+
     .favourites-btn:hover {
-        background-color: #064E45;
+        background-color: #064e45;
     }
 
     .to-watch-btn {
-        background-color: #064E45;
+        background-color: #064e45;
         color: white;
     }
 

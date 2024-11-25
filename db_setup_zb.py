@@ -106,7 +106,6 @@ cursor.execute('''
 
 
 
-
 #Ratings Table
 cursor.execute('''
             CREATE TABLE IF NOT EXISTS Ratings (
@@ -119,34 +118,28 @@ cursor.execute('''
                 FOREIGN KEY (movie_id) REFERENCES Movies(movie_id)
 );
 ''')
-
 #WatchHistory Table
 cursor.execute('''
             CREATE TABLE IF NOT EXISTS WatchHistory (
                 movie_id INT,
                 user_id INT,
                 watch_date DATE DEFAULT CURRENT_DATE,
-                rating_id INT,
                 PRIMARY KEY(movie_id, user_id),
                 FOREIGN KEY(movie_id) REFERENCES Movies(movie_id),
                 FOREIGN KEY(user_id) REFERENCES Users(user_id)
             )
 ''')
-
-#Favourites Table
+#Favorites Table
 cursor.execute('''
             CREATE TABLE IF NOT EXISTS Favorites (
                 user_id INT NOT NULL,
                 movie_id INT NOT NULL,
-                rating_id INT NOT NULL,
                 added_at DATE DEFAULT CURRENT_DATE,
                 FOREIGN KEY (user_id) REFERENCES Users(user_id),
                 FOREIGN KEY (movie_id) REFERENCES Movies(movie_id),
-                FOREIGN KEY (rating_id) REFERENCES Ratings(rating_id),
                 UNIQUE (user_id, movie_id)
             )
 ''')
-
 #To be watched table
 cursor.execute('''
             CREATE TABLE IF NOT EXISTS To_Be_Watched (
