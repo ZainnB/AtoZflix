@@ -119,26 +119,22 @@ cursor.execute('''
                 FOREIGN KEY (movie_id) REFERENCES Movies(movie_id)
 );
 ''')
-
-cursor.execute('DROP TABLE IF EXISTS WatchHistory')
-
 #Favorites Table
 cursor.execute('''
             CREATE TABLE IF NOT EXISTS Favorites (
-                user_id INT NOT NULL,
-                movie_id INT NOT NULL,
+                user_id INTEGER NOT NULL,
+                movie_id INTEGER NOT NULL,
                 added_at DATE DEFAULT CURRENT_DATE,
                 FOREIGN KEY (user_id) REFERENCES Users(user_id),
                 FOREIGN KEY (movie_id) REFERENCES Movies(movie_id),
                 UNIQUE (user_id, movie_id)
             )
 ''')
-
 #WatchLater table
 cursor.execute('''
             CREATE TABLE IF NOT EXISTS WatchLater (
-                user_id INT NOT NULL,
-                movie_id INT NOT NULL,
+                user_id INTEGER NOT NULL,
+                movie_id INTEGER NOT NULL,
                 added_at DATE DEFAULT CURRENT_DATE,
                 FOREIGN KEY (user_id) REFERENCES Users(user_id),
                 FOREIGN KEY (movie_id) REFERENCES Movies(movie_id),

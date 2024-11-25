@@ -13,16 +13,15 @@
     let error = null;
     let sidebar = false;
     let isFavourite = false; // Tracks if movie is in favourites
+    let isInWatchlist = false; // Tracks if movie is in watchlist
     let user_id;
 
-    // Lifecycle: On component mount
     onMount(async () => {
         redirectToRegisterIfNotAuthenticated();
         user_id = JSON.parse(localStorage.getItem("user")).userId;
         const params = new URLSearchParams(window.location.search);
-        console.log(user_id)
         movie_id = params.get("movie_id");
-        console.log(movie_id)
+
         if (!movie_id) {
             error = "No movie ID provided";
             return;
@@ -31,36 +30,43 @@
         // Fetch movie details
         try {
             const response = await fetch(
-                `http://127.0.0.1:5000/api/movie_details?movie_id=${movie_id}`,
+                `http://127.0.0.1:5000/api/movie_details?movie_id=${movie_id}`
             );
             if (!response.ok) throw new Error("Failed to fetch movie details");
             const data = await response.json();
             movie = data.movie;
 
             // Check if movie is already in user's favourites
-            console.log(user_id,movie_id)
             const favResponse = await fetch(
-                
-                `http://127.0.0.1:5000/api/check_favourite?user_id=${user_id}&movie_id=${movie_id}`,
+                `http://127.0.0.1:5000/api/check_favourite?user_id=${user_id}&movie_id=${movie_id}`
             );
             if (favResponse.ok) {
                 const favData = await favResponse.json();
-                console.log(favData)
                 isFavourite = favData.is_favourite;
-                console.log(isFavourite)
+            }
+
+            // Check if movie is in user's watchlist
+            const watchlistResponse = await fetch(
+                `http://127.0.0.1:5000/api/check_watchlist?user_id=${user_id}&movie_id=${movie_id}`
+            );
+            if (watchlistResponse.ok) {
+                const watchlistData = await watchlistResponse.json();
+                isInWatchlist = watchlistData.is_in_watchlist;
             }
         } catch (err) {
             error = err.message;
         }
     });
+
     const rateMovie = () => {
         isRatingOpen = true;
     };
+
     const toggleFavourite = async () => {
         const url = isFavourite
             ? `http://127.0.0.1:5000/api/remove_favorite`
             : `http://127.0.0.1:5000/api/add_favourite`;
-            console.log(user_id,movie_id)
+
         const response = await fetch(url, {
             method: "POST",
             headers: {
@@ -75,7 +81,29 @@
             console.error("Failed to update favourite status");
         }
     };
+
+    const toggleWatchlist = async () => {
+        console.log(user_id,movie_id)
+        const url = isInWatchlist
+            ? `http://127.0.0.1:5000/api/remove_from_watchlist`
+            : `http://127.0.0.1:5000/api/add_to_watchlist`;
+
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ user_id, movie_id }),
+        });
+
+        if (response.ok) {
+            isInWatchlist = !isInWatchlist; // Toggle the watchlist status
+        } else {
+            console.error("Failed to update watchlist status");
+        }
+    };
 </script>
+
 
 <!-- Modal for rating -->
 <RatingModal bind:show={isRatingOpen} {movie_id} />
@@ -118,7 +146,10 @@
                         >
                             {isFavourite ? "Remove from Favourites" : "Add to Favourites"}
                         </button>
-                        <button class="to-watch-btn">Add to Watch Later</button>
+                        <button class="to-watch-btn" on:click={toggleWatchlist}>
+                            {isInWatchlist ? "Remove from Watch Later" : "Add to Watch Later"}
+                        </button>
+                        
                         <button class="rate-btn" on:click={rateMovie}>Give Rating</button>
                     </div>
                 </div>
