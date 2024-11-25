@@ -47,6 +47,7 @@
                 const favData = await favResponse.json();
                 console.log(favData)
                 isFavourite = favData.is_favourite;
+                console.log(isFavourite)
             }
         } catch (err) {
             error = err.message;
@@ -110,7 +111,13 @@
                         {movie.rating_avg} ({movie.rating_count} votes)
                     </p>
                     <div class="action-buttons">
-                        <button class="favourites-btn">Add to Favourites</button>
+                        <button
+                            class="favourites-btn"
+                            class:is-favourite={isFavourite}
+                            on:click={toggleFavourite}
+                        >
+                            {isFavourite ? "Remove from Favourites" : "Add to Favourites"}
+                        </button>
                         <button class="to-watch-btn">Add to Watch Later</button>
                         <button class="rate-btn" on:click={rateMovie}>Give Rating</button>
                     </div>
@@ -238,6 +245,60 @@
 
     .to-watch-btn:hover {
         background-color: #098577;
+    }
+
+    .rate-btn {
+        background-color: #333;
+        color: white;
+    }
+
+    .rate-btn:hover {
+        background-color: #555;
+    }
+    .action-buttons button {
+        padding: 12px 20px;
+        border-radius: 5px;
+        font-size: 1rem;
+        margin-right: 10px;
+        cursor: pointer;
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+    /* Default button styles */
+    .favourites-btn {
+        background-color: #333;
+        color: white;
+        border: 2px solid transparent;
+    }
+
+    /* Add-to-Favourites style */
+    .favourites-btn:not(.is-favourite) {
+        background-color: #098577; /* Green for adding */
+    }
+
+    /* Remove-from-Favourites style */
+    .favourites-btn.is-favourite {
+        background-color: #e50914; /* Netflix red for removing */
+        border-color: #b71c1c; /* Red border for distinction */
+    }
+
+    /* Hover effects */
+    .favourites-btn:hover:not(.is-favourite) {
+        background-color: #064e45; /* Darker green */
+    }
+
+    .favourites-btn:hover.is-favourite {
+        background-color: #b71c1c; /* Darker red */
+    }
+
+    .to-watch-btn {
+        background-color: #098577;
+        color: white;
+    }
+
+    .to-watch-btn:hover {
+        background-color: #064e45;
     }
 
     .rate-btn {
