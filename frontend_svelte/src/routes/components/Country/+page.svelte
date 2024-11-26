@@ -5,7 +5,9 @@
     import SideBar from "../Home/SideBar.svelte";
     import Footer from "../Register/Footer1.svelte";
     import Line from "../Register/Line.svelte";
+    import { redirectToRegisterIfNotAuthenticated } from "../../../utils/auth.js";
     import { onMount } from "svelte";
+    import { redirect } from "@sveltejs/kit";
   
     let country_list;
     let movies = [];
@@ -13,6 +15,7 @@
   
     // Fetch country list on component mount
     onMount(async () => {
+        redirectToRegisterIfNotAuthenticated();
         const response = await fetch("http://127.0.0.1:5000/api/get_country_names");
         if (!response.ok) {
             console.error("Failed to fetch country list");

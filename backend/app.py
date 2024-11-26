@@ -2,7 +2,8 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import sqlite3
 import re
-import bcrypt
+import requests
+import time
 import json
 from datetime import date
 
@@ -1021,7 +1022,293 @@ def check_watchlist():
     finally:
         conn.close()
 
+# Movie Management API Endpoints
+API_KEY = 'ddfbd71a6d0caa560e3a1f793b91aa5f'
+BASE_URL = "https://api.themoviedb.org/3"
 
+def get_db_connection():
+    conn = sqlite3.connect('movies.db')
+    conn.row_factory = sqlite3.Row
+    return conn
+
+@app.route('/api/add_single_movie', methods=['POST'])
+def add_single_movie():
+    admin_id = request.json.get('admin_id')
+    movie_id = request.json.get('movie_id')
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # Add single movie transaction logic
+        details = fetch_movie_details(movie_id)
+        if movie_exists(cursor, details['id']):
+            return jsonify({'error': 'Movie already exists in the database'}), 400
+
+        credits = fetch_credits(details['id'])
+        populate_movies(cursor, details)
+        populate_genres(cursor, details)
+        populate_actors_and_crew(cursor, credits, details['id'])
+        
+        log_action(cursor, admin_id, 'Add', f"Added movie {details['title']} (ID: {details['id']})")
+        conn.commit()
+        return jsonify({'message': f"Movie '{details['title']}' added successfully"}), 201
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/update_single_movie', methods=['PUT'])
+def update_single_movie():
+    admin_id = request.json.get('admin_id')
+    movie_id = request.json.get('movie_id')
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # Update single movie transaction logic
+        if not movie_exists(cursor, movie_id):
+            return jsonify({'error': 'Movie does not exist in the database'}), 404
+
+        details = fetch_movie_details(movie_id)
+        credits = fetch_credits(movie_id)
+
+        populate_movies(cursor, details)
+        populate_genres(cursor, details)
+        populate_actors_and_crew(cursor, credits, movie_id)
+        
+        log_action(cursor, admin_id, 'Update', f"Updated movie {details['title']} (ID: {movie_id})")
+        conn.commit()
+        return jsonify({'message': f"Movie '{details['title']}' updated successfully"}), 200
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/delete_single_movie', methods=['DELETE'])
+def delete_single_movie():
+    admin_id = request.json.get('admin_id')
+    movie_id = request.json.get('movie_id')
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # Delete single movie transaction logic
+        if not movie_exists(cursor, movie_id):
+            return jsonify({'error': 'Movie does not exist in the database'}), 404
+
+        cursor.execute('DELETE FROM Movies_Actors WHERE movie_id = ?', (movie_id,))
+        cursor.execute('DELETE FROM Movies_Crew WHERE movie_id = ?', (movie_id,))
+        cursor.execute('DELETE FROM Movies_Genres WHERE movie_id = ?', (movie_id,))
+        cursor.execute('DELETE FROM Favorites WHERE movie_id = ?', (movie_id,))
+        cursor.execute('DELETE FROM WatchLater WHERE movie_id = ?', (movie_id,))
+        cursor.execute('DELETE FROM Ratings WHERE movie_id = ?', (movie_id,))
+        cursor.execute('DELETE FROM Movies WHERE movie_id = ?', (movie_id,))
+        
+        log_action(cursor, admin_id, 'Delete', f"Deleted movie ID: {movie_id}")
+        conn.commit()
+        return jsonify({'message': f"Movie with ID '{movie_id}' deleted successfully"}), 200
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/add_batch_movies', methods=['POST'])
+def add_batch_movies():
+    admin_id = request.json.get('admin_id')
+    year_start = request.json.get('year_start')
+    year_end = request.json.get('year_end')
+    page_start = request.json.get('page_start', 1)
+    page_end = request.json.get('page_end', 1)
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        conn.execute('PRAGMA journal_mode=WAL;')  # Enable WAL mode for concurrency
+        for page in range(page_start, page_end + 1):
+            movies = fetch_movies(year_start, year_end, page).get('results', [])
+            for movie in movies:
+                if not movie_exists(cursor, movie['id']):
+                    details = fetch_movie_details(movie['id'])
+                    credits = fetch_credits(movie['id'])
+                    populate_movies(cursor, details)
+                    populate_genres(cursor, details)
+                    populate_actors_and_crew(cursor, credits, movie['id'])
+            conn.commit()  # Commit after processing each page
+
+        log_action(cursor, admin_id, 'Add', f"Added movies for {year_start}-{year_end}, pages {page_start}-{page_end}")
+        conn.commit()
+        return jsonify({'message': f"Movies added successfully for {year_start}-{year_end}, pages {page_start}-{page_end}"}), 201
+    except sqlite3.OperationalError as e:
+        conn.rollback()
+        return jsonify({'error': 'Database operation failed. Check for locks or concurrency issues.'}), 500
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
+@app.errorhandler(500)
+def handle_internal_error(e):
+    app.logger.error(f"Server Error: {e}, route: {request.url}")
+    return jsonify({'error': 'Internal Server Error'}), 500
+
+@app.route('/api/update_batch_movies', methods=['PUT'])
+def update_batch_movies():
+    admin_id = request.json.get('admin_id')
+    year_start = request.json.get('year_start')
+    year_end = request.json.get('year_end')
+    page_start = request.json.get('page_start', 1)
+    page_end = request.json.get('page_end', 1)
+    
+    try:
+        for page in range(page_start, page_end + 1):
+            # Fetch movies from TMDB
+            movies = fetch_movies(year_start, year_end, page).get('results', [])
+            for movie in movies:
+                # Fetch details and credits for the movie
+                details = fetch_movie_details(movie['id'])
+                credits = fetch_credits(movie['id'])
+
+                # Handle database operations within a new connection for each movie
+                conn = get_db_connection()
+                cursor = conn.cursor()
+                try:
+                    if movie_exists(cursor, movie['id']):
+                        populate_movies(cursor, details)
+                        populate_genres(cursor, details)
+                        populate_actors_and_crew(cursor, credits, movie['id'])
+                    conn.commit()
+                except Exception as e:
+                    conn.rollback()
+                    raise e
+                finally:
+                    conn.close()
+
+        # Log the update action
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        try:
+            log_action(cursor, admin_id, 'Update', f"Updated movies for {year_start}-{year_end}, pages {page_start}-{page_end}")
+            conn.commit()
+        finally:
+            conn.close()
+
+        return jsonify({'message': f"Movies updated successfully for {year_start}-{year_end}, pages {page_start}-{page_end}"}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+def fetch_with_retry(url, params, retries=3, backoff_factor=1):
+    for attempt in range(retries):
+        try:
+            response = requests.get(url, params=params, timeout=10)  # Set a timeout
+            response.raise_for_status()  # Raise an error for HTTP codes >= 400
+            return response
+        except requests.exceptions.RequestException as e:
+            if attempt < retries - 1:
+                wait = backoff_factor * (2 ** attempt)  # Exponential backoff
+                print(f"Error: {e}. Retrying in {wait} seconds...")
+                time.sleep(wait)
+            else:
+                raise
+
+def fetch_movies(year_start, year_end, page=1):
+    url = f"{BASE_URL}/discover/movie"
+    params = {
+        "api_key": API_KEY,
+        "language": "en-US",
+        "sort_by": "vote_average.desc",
+        "primary_release_date.gte": f"{year_start}-01-01",
+        "primary_release_date.lte": f"{year_end}-12-31",
+        "vote_count.gte": 2000 if year_end <= 2022 else 500,
+        "vote_average.gte": 6,
+        "page": page
+    }
+    response = fetch_with_retry(url, params=params)
+    return response.json()
+
+def fetch_movie_details(movie_id):
+    url = f"{BASE_URL}/movie/{movie_id}"
+    params = {"api_key": API_KEY, "language": "en-US"}
+    response = fetch_with_retry(url, params=params)
+    return response.json()
+
+def fetch_credits(movie_id):
+    url = f"{BASE_URL}/movie/{movie_id}/credits"
+    params = {"api_key": API_KEY}
+    response = fetch_with_retry(url, params=params)
+    return response.json()
+
+def movie_exists(cursor, movie_id):
+    cursor.execute('SELECT 1 FROM Movies WHERE movie_id = ?', (movie_id,))
+    return cursor.fetchone() is not None
+
+def populate_movies(cursor, movie):
+    cursor.execute('''
+        INSERT OR IGNORE INTO Movies (
+            movie_id, title, original_title, budget, original_language,
+            release_date, revenue, runtime, overview, production_companies,
+            production_countries, rating_avg, rating_count, country,
+            backdrop_path, poster_path, adult
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (
+        movie['id'], movie['title'], movie['original_title'], movie.get('budget', 0),
+        movie['original_language'], movie['release_date'], movie.get('revenue', 0),
+        movie.get('runtime', 0), movie.get('overview', 'No Overview'),
+        ', '.join([c['name'] for c in movie.get('production_companies', [])]),
+        ', '.join([c['name'] for c in movie.get('production_countries', [])]),
+        movie['vote_average'], movie['vote_count'],
+        ', '.join([c['name'] for c in movie.get('production_countries', [])]),
+        movie.get('backdrop_path', 'Backdrop is not available'),
+        movie.get('poster_path', 'Poster is not available'),
+        movie['adult']
+    ))
+
+def populate_genres(cursor, movie):
+    for genre in movie.get('genres', []):
+        cursor.execute('''
+            INSERT OR IGNORE INTO Genres (genre_id, genre_name)
+            VALUES (?, ?)
+        ''', (genre['id'], genre['name']))
+        cursor.execute('''
+            INSERT OR IGNORE INTO Movies_Genres (movie_id, genre_id)
+            VALUES (?, ?)
+        ''', (movie['id'], genre['id']))
+
+def populate_actors_and_crew(cursor, credits, movie_id):
+    for cast in credits.get('cast', []):
+        cursor.execute('''
+            INSERT OR IGNORE INTO Actors (actor_id, actor_name, character_name)
+            VALUES (?, ?, ?)
+        ''', (cast['id'], cast['name'], cast.get('character', 'Unknown')))
+        cursor.execute('''
+            INSERT OR IGNORE INTO Movies_Actors (movie_id, actor_id)
+            VALUES (?, ?)
+        ''', (movie_id, cast['id']))
+    
+    for crew in credits.get('crew', []):
+        if crew['job'] in ['Director', 'Producer', 'Writer']:
+            cursor.execute('''
+                INSERT OR IGNORE INTO Crew (crew_id, crew_name, job_title)
+                VALUES (?, ?, ?)
+            ''', (crew['id'], crew['name'], crew['job']))
+            cursor.execute('''
+                INSERT OR IGNORE INTO Movies_Crew (movie_id, crew_id)
+                VALUES (?, ?)
+            ''', (movie_id, crew['id']))
+
+def log_action(cursor, admin_id, action, details):
+    cursor.execute('''
+        INSERT INTO MovieLogs (admin_id, action, details)
+        VALUES (?, ?, ?)
+    ''', (admin_id, action, details))
+
+
+# User Management API Endpoints
 @app.route('/api/get_all_users', methods=['GET'])
 def getAllUsers():
     try:
@@ -1030,12 +1317,12 @@ def getAllUsers():
         cursor = conn.cursor()
 
         # Query to fetch all users
-        query = "SELECT user_id, email, username FROM Users"
+        query = "SELECT user_id, email, username, role FROM Users"
         cursor.execute(query)
 
         # Fetch all results as a list of dictionaries
         users = [
-            {"user_id": row[0], "email": row[1], "username": row[2]}
+            {"user_id": row[0], "email": row[1], "username": row[2], "role": row[3]}
             for row in cursor.fetchall()
         ]
 
@@ -1048,7 +1335,94 @@ def getAllUsers():
     except Exception as e:
         # Handle errors
         return jsonify({"status": "error", "message": str(e)}), 500
-    
+
+@app.route('/api/delete_user', methods=['DELETE'])
+def delete_user():
+    user_id = request.args.get('user_id')
+    admin_id = request.args.get('admin_id')  # Admin ID to identify the admin performing the action
+    if not user_id or not admin_id:
+        return jsonify({"error": "user_id and admin_id are required"}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Fetch the user data before deletion (old data)
+        cursor.execute('SELECT user_id, email, username, role FROM Users WHERE user_id = ?', (user_id,))
+        user = cursor.fetchone()
+
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+
+        # Delete the user
+        cursor.execute('DELETE FROM Users WHERE user_id = ?', (user_id,))
+        conn.commit()
+
+        # Prepare the old data for logging
+        old_data = {"user_id": user[0], "email": user[1], "username": user[2], "role": user[3]}
+        
+        # Log the deletion in the UserLogs table
+        cursor.execute('''
+            INSERT INTO UserLogs (admin_id, user_id, action, old_data)
+            VALUES (?, ?, ?, ?)
+        ''', (admin_id, user_id, 'Delete', json.dumps(old_data)))
+        conn.commit()
+
+        return jsonify({"message": "User deleted successfully"}), 200
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"error": "Failed to delete user"}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/update_user', methods=['PUT'])
+def update_user():
+    user_id = request.json.get('user_id')
+    username = request.json.get('username')
+    email = request.json.get('email')
+    role = request.json.get('role')
+    admin_id = request.json.get('admin_id')  # Admin ID to identify the admin performing the action
+
+    if not user_id or not username or not email or not role or not admin_id:
+        return jsonify({"error": "user_id, username, email, role, and admin_id are required"}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Fetch old data before update
+        cursor.execute('SELECT user_id, email, username, role FROM Users WHERE user_id = ?', (user_id,))
+        old_user = cursor.fetchone()
+
+        if not old_user:
+            return jsonify({"error": "User not found"}), 404
+
+        # Update user information
+        cursor.execute('''
+            UPDATE Users
+            SET username = ?, email = ?, role = ?
+            WHERE user_id = ?
+        ''', (username, email, role, user_id))
+        conn.commit()
+
+        # Prepare the old and new data for logging
+        old_data = {"user_id": old_user[0], "email": old_user[1], "username": old_user[2], "role": old_user[3]}
+        new_data = {"user_id": user_id, "email": email, "username": username, "role": role}
+
+        # Log the update in the UserLogs table
+        cursor.execute('''
+            INSERT INTO UserLogs (admin_id, user_id, action, old_data, new_data)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (admin_id, user_id, 'Update', json.dumps(old_data), json.dumps(new_data)))
+        conn.commit()
+        return jsonify({"message": "User updated successfully"}), 200
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"error": "Failed to update user"}), 500
+    finally:
+        conn.close()
+
+
 @app.route('/api/get_all_ratings', methods=['GET'])
 def get_all_ratings():
     try:
@@ -1105,55 +1479,6 @@ def get_all_movies():
     except Exception as e:
         print(e)
         return jsonify({"error": "Failed to fetch movies"}), 500
-    finally:
-        conn.close()
-
-@app.route('/api/delete_user', methods=['DELETE'])
-def delete_user():
-    user_id = request.args.get('user_id')
-    if not user_id:
-        return jsonify({"error": "user_id is required"}), 400
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    try:
-        cursor.execute('DELETE FROM Users WHERE user_id = ?', (user_id,))
-        conn.commit()
-        if cursor.rowcount == 0:
-            return jsonify({"error": "User not found"}), 404
-        return jsonify({"message": "User deleted successfully"}), 200
-    except Exception as e:
-        print(f"Error deleting user: {e}")
-        return jsonify({"error": "Failed to delete user"}), 500
-    finally:
-        conn.close()
-
-@app.route('/api/update_user', methods=['PUT'])
-def update_user():
-    user_id = request.json.get('user_id')
-    username = request.json.get('username')
-    email = request.json.get('email')
-
-    if not user_id or not username or not email:
-        return jsonify({"error": "user_id, username, and email are required"}), 400
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    try:
-        cursor.execute('''
-            UPDATE Users
-            SET username = ?, email = ?
-            WHERE user_id = ?
-        ''', (username, email, user_id))
-        conn.commit()
-        if cursor.rowcount == 0:
-            return jsonify({"error": "User not found"}), 404
-        return jsonify({"message": "User updated successfully"}), 200
-    except Exception as e:
-        print(f"Error updating user: {e}")
-        return jsonify({"error": "Failed to update user"}), 500
     finally:
         conn.close()
 

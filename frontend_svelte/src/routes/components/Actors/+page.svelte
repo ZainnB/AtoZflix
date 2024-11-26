@@ -5,6 +5,7 @@
     import SideBar from "../Home/SideBar.svelte";
     import Footer from "../Register/Footer1.svelte";
     import Line from "../Register/Line.svelte";
+    import { redirectToRegisterIfNotAuthenticated } from "../../utils/auth";
 
     // State variables
     let topActors = [];
@@ -13,6 +14,7 @@
     let searchQuery = ""; // Query for searching actors
 
     onMount(async () => {
+      redirectToRegisterIfNotAuthenticated();
       try {
         const response = await fetch(`http://127.0.0.1:5000/api/top-actors?limit=${limit}`);
         if (!response.ok) {

@@ -1,5 +1,6 @@
 <script>
     import { onMount } from "svelte";
+    import { redirectToRegisterIfNotAuthenticated } from "../../utils/auth";
     import GeneralSlider2 from "../GenralSlider2/+page.svelte";
     import Navbar from "../Home/Navbar2.svelte";
     import SideBar from "../Home/SideBar.svelte";
@@ -13,6 +14,7 @@
     let searchQuery = "";
 
     onMount(async () => {
+      redirectToRegisterIfNotAuthenticated();
       try {
         const response = await fetch(`http://127.0.0.1:5000/api/top-crew?limit=${limit}`);
         if (!response.ok) {
