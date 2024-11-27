@@ -1,112 +1,178 @@
 <script>
   import { onMount } from "svelte";
+  import { writable } from "svelte/store";
   import MovieCard from "../Slider/movie_card.svelte";
-  import { redirectToRegisterIfNotAuthenticated } from "../../../utils/auth.js";
 
+  const BASE_URL = "http://localhost:5000/api";
+
+  // Admin actions form data
+  let admin_id = "";
+  let movie_id = "";
+  let year_start = 2024;
+  let year_end = 2024;
+  let page_start = 1;
+  let page_end = 1;
+
+  // Search functionality form data
   let query = "";
   let movies = [];
-  let error = "";
-  let movieIdInput = "";
-  let batchStartYear = "";
-  let batchEndYear = "";
-  let batchStartPage = "";
-  let batchEndPage = "";
-  let testResponse = "";
+  let searchError = "";
 
-  // Admin ID (assuming stored in localStorage)
-  let adminId = JSON.parse(localStorage.getItem("user"))?.userId || null;
+  let responseMessage = writable("");
 
-  // Fetch movies on query change
-  async function fetchMovies() {
-    if (!query) return;
-
-    try {
-      const response = await fetch(`http://localhost:5000/api/search_movie?query=${encodeURIComponent(query)}&limit=10`);
-      const data = await response.json();
-
-      if (response.ok) {
-        movies = data.movies;
-      } else {
-        error = data.error || "Failed to fetch movies.";
+  // API request handler
+  const callApi = async (endpoint, method, body) => {
+      try {
+          const res = await fetch(`${BASE_URL}/${endpoint}`, {
+              method: method,
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(body),
+          });
+          const data = await res.json();
+          responseMessage.set(data.message || data.error || "Action completed");
+      } catch (error) {
+          responseMessage.set(`Error: ${error.message}`);
       }
-    } catch (err) {
-      error = "Error occurred while fetching movies.";
-    }
-  }
+  };
 
-  // Single Movie Action (Add, Update, Delete)
-  async function handleSingleMovieAction(action) {
-    if (!movieIdInput) {
-      alert("Enter a Movie ID");
-      return;
-    }
+  // Admin panel actions
+  const addSingleMovie = () =>
+      callApi("add_single_movie", "POST", { admin_id, movie_id });
 
-    const url = `/api/${action}_single_movie`;
-    try {
-      const response = await fetch(`http://localhost:5000${url}`, {
-        method: action === "delete" ? "DELETE" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ admin_id: adminId, movie_id: movieIdInput }),
+  const updateSingleMovie = () =>
+      callApi("update_single_movie", "PUT", { admin_id, movie_id });
+
+  const deleteSingleMovie = () =>
+      callApi("delete_single_movie", "DELETE", { admin_id, movie_id });
+
+  const addBatchMovies = () =>
+      callApi("add_batch_movies", "POST", {
+          admin_id,
+          year_start,
+          year_end,
+          page_start,
+          page_end,
       });
-      const result = await response.json();
-      alert(response.ok ? result.message : result.error || "Action failed");
-      fetchMovies();
-    } catch {
-      alert("Request failed.");
-    }
-  }
 
+  const updateBatchMovies = () =>
+      callApi("update_batch_movies", "PUT", {
+          admin_id,
+          year_start,
+          year_end,
+          page_start,
+          page_end,
+      });
 
-  onMount(() => {
-    redirectToRegisterIfNotAuthenticated();
-  });
+  // Search functionality
+  const searchMovies = async () => {
+      try {
+          const res = await fetch(`${BASE_URL}/search_movie?query=${encodeURIComponent(query)}&limit=10`);
+          const data = await res.json();
+          if (res.ok) {
+              movies = data.movies;
+              searchError = "";
+          } else {
+              searchError = data.error || "Failed to fetch movies.";
+          }
+      } catch (err) {
+          searchError = "An error occurred while searching movies.";
+          console.error(err);
+      }
+  };
 </script>
-<div class="wrapper">
-  <div class="content">
-    <!-- Search Bar -->
-    <input
-      type="text"
-      placeholder="Search for a movie..."
-      bind:value={query}
-      on:change={fetchMovies}
-    />
-
-    <!-- Search Results -->
-    {#if error}
-      <p class="error">{error}</p>
-    {:else if movies.length === 0}
-      <p>No movies found.</p>
-    {:else}
-      <div class="movies-grid">
-        {#each movies.slice(0, 8) as { poster_path, movie_id }}
-          <MovieCard poster_path={poster_path} movie_id={movie_id} />
-        {/each}
-      </div>
-    {/if}
-
-    <!-- Single Movie Actions -->
-    <h3>Single Movie Actions</h3>
-    <input
-      type="text"
-      placeholder="Movie ID"
-      bind:value={movieIdInput}
-    />
-    <button on:click={() => handleSingleMovieAction("add")}>Add Movie</button>
-    <button on:click={() => handleSingleMovieAction("update")}>Update Movie</button>
-    <button on:click={() => handleSingleMovieAction("delete")}>Delete Movie</button>
-  </div>
-</div>
-  
 
 <style>
-  .error {
-    color: red;
+  body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      padding: 20px;
+  }
+
+  input, button {
+      margin: 5px 0;
+      padding: 8px;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+  }
+
+  input {
+      background-color: #1e1e1e;
+      color: #fff;
+      width: 100%;
+  }
+
+  button {
+      background-color: #007BFF;
+      color: white;
+      cursor: pointer;
+  }
+
+  button:hover {
+      background-color: #0056b3;
+  }
+
+  .response, .search-results {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #1e1e1e;
+      border-radius: 5px;
   }
 
   .movies-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 20px;
   }
 </style>
+
+<main class = "body">
+  <h1>Admin Panel</h1>
+
+  <!-- Admin Actions -->
+  <section>
+      <h2>Single Movie Actions</h2>
+      <input type="text" placeholder="Admin ID" bind:value={admin_id} />
+      <input type="text" placeholder="Movie ID" bind:value={movie_id} />
+      <button on:click={addSingleMovie}>Add Single Movie</button>
+      <button on:click={updateSingleMovie}>Update Single Movie</button>
+      <button on:click={deleteSingleMovie}>Delete Single Movie</button>
+  </section>
+
+  <section>
+      <h2>Batch Movie Actions</h2>
+      <input type="text" placeholder="Admin ID" bind:value={admin_id} />
+      <input type="number" placeholder="Year Start" bind:value={year_start} />
+      <input type="number" placeholder="Year End" bind:value={year_end} />
+      <input type="number" placeholder="Page Start" bind:value={page_start} />
+      <input type="number" placeholder="Page End" bind:value={page_end} />
+      <button on:click={addBatchMovies}>Add Batch Movies</button>
+      <button on:click={updateBatchMovies}>Update Batch Movies</button>
+  </section>
+
+  <div class="response">
+      <h3>Admin Response:</h3>
+      <p>{$responseMessage}</p>
+  </div>
+
+  <!-- Search Movies -->
+  <section>
+      <h2>Search Movies</h2>
+      <input type="text" placeholder="Search Query" bind:value={query} />
+      <button on:click={searchMovies}>Search</button>
+
+      {#if searchError}
+          <p class="error">{searchError}</p>
+      {:else if movies.length === 0 && query}
+          <p>No results found.</p>
+      {:else}
+          <div class="movies-grid">
+              {#each movies as { poster_path, movie_id }}
+                  <MovieCard poster_path={poster_path} movie_id={movie_id} />
+              {/each}
+          </div>
+      {/if}
+  </section>
+</main>

@@ -1115,8 +1115,8 @@ def delete_single_movie():
 @app.route('/api/add_batch_movies', methods=['POST'])
 def add_batch_movies():
     admin_id = request.json.get('admin_id')
-    year_start = request.json.get('year_start')
-    year_end = request.json.get('year_end')
+    year_start = request.json.get('year_start', 2024)
+    year_end = request.json.get('year_end', 2024)
     page_start = request.json.get('page_start', 1)
     page_end = request.json.get('page_end', 1)
     conn = get_db_connection()
@@ -1158,8 +1158,8 @@ def handle_internal_error(e):
 @app.route('/api/update_batch_movies', methods=['PUT'])
 def update_batch_movies():
     admin_id = request.json.get('admin_id')
-    year_start = request.json.get('year_start')
-    year_end = request.json.get('year_end')
+    year_start = request.json.get('year_start', 2024)
+    year_end = request.json.get('year_end', 2024)
     page_start = request.json.get('page_start', 1)
     page_end = request.json.get('page_end', 1)
     
