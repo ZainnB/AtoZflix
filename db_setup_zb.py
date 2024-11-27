@@ -168,8 +168,6 @@ cursor.execute('''
             FOREIGN KEY (admin_id) REFERENCES Users(user_id)
             )
 ''')
-
-
 # Commit the changes and close the connection
 conn.commit()
 conn.close()

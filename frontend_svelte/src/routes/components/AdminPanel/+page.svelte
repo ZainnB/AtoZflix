@@ -1,16 +1,18 @@
 <script>
-    import { goto } from '$app/navigation';
+    const NavigateToUserAdminPanel=()=>{
+        window.location.href="./UserAdminPanel"
+    }
+    const NavigateToMovieAdminPanel=()=>{
+        window.location.href="./MovieAdminPanel"
+    }
 </script>
 
 <div class="admin-home-wrapper">
-    <Navbar />
-    <SideBar />
-
     <div class="content">
         <h1>Admin Dashboard</h1>
         <div class="navigation">
-            <button on:click={() => goto('/AdminPanel/MovieAdminPanel')}>Go to Movie Admin Panel</button>
-            <button on:click={() => goto('/AdminPanel/UserAdminPanel')}>Go to User Admin Panel</button>
+            <button on:click={NavigateToMovieAdminPanel}>Go to Movie Admin Panel</button>
+            <button on:click={NavigateToUserAdminPanel}>Go to User Admin Panel</button>
         </div>
     </div>
 </div>

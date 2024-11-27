@@ -67,8 +67,10 @@
     });
 </script>
 
+<div class="back-button" style="padding:12px;">
+    <button on:click={() => window.history.back()}>Back</button>
+  </div>
 <div class="admin-wrapper">
-
     <div class="admin-panel">
         <h1 class="panel-title">User Admin Panel</h1>
 
@@ -257,4 +259,26 @@
         font-weight: bold;
         color: #888;
     }
+    .back-button {
+  margin-top: 20px;
+  text-align: center;
+  
+  background-color: #121212;
+  
+}
+
+.back-button button {
+  background-color: #555;
+  color: #fff;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.back-button button:hover {
+  background-color: #333;
+}
+
 </style>

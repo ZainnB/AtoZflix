@@ -142,9 +142,33 @@
     padding: 15px;
     border-radius: 5px;
   }
+  .back-button {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.back-button button {
+  background-color: #555;
+  color: #fff;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.back-button button:hover {
+  background-color: #333;
+}
+
 </style>
 
 <main>
+  <!-- Back Button -->
+<div class="back-button">
+  <button on:click={() => window.history.back()}>Back</button>
+</div>
+
   <!-- Search Bar -->
   <div class="search-bar">
     <h1>Search Movies</h1>
