@@ -4,8 +4,8 @@
   import FAQ from "./FAQ.svelte";
   import Footer from "./Footer1.svelte";
   import Line from "./Line.svelte";
-  import { redirectToHomeIfAuthenticated } from "../../../utils/auth.js";
-    import { onMount } from "svelte";
+  import { redirectToRegisterIfNotAuthenticated } from "/src/utils/auth.js";
+  import { onMount } from "svelte";
 
   onMount(async ()=>{
     redirectToHomeIfAuthenticated();

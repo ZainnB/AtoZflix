@@ -1,6 +1,6 @@
 <script>
     import { onMount } from 'svelte';
-    import { redirectToRegisterIfNotAuthenticated } from '../../../utils/auth.js';
+    import { redirectToRegisterIfNotAuthenticated } from "/src/utils/auth.js";
 
     let selectedOption = 'users'; // Default to 'users'
     let data = null; // Holds fetched data

@@ -5,8 +5,8 @@
     import SideBar from "../Home/SideBar.svelte";
     import Footer from "../Register/Footer1.svelte";
     import Line from "../Register/Line.svelte";
-    import { redirectToRegisterIfNotAuthenticated } from "../../utils/auth";
-
+    import { redirectToRegisterIfNotAuthenticated } from "/src/utils/auth.js";
+    
     // State variables
     let topActors = [];
     const limit = 10;

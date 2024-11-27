@@ -1,6 +1,6 @@
 <script>
     import { onMount } from "svelte";
-    import { redirectToRegisterIfNotAuthenticated } from "../../../utils/auth.js";
+    import { redirectToRegisterIfNotAuthenticated } from "/src/utils/auth.js";
     import MovieCard from "../Slider/movie_card.svelte";
     import Navbar from "../Home/Navbar2.svelte";
     import SideBar from "../Home/SideBar.svelte";

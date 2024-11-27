@@ -5,7 +5,7 @@
     import SideBar from "../Home/SideBar.svelte";
     import Footer from "../Register/Footer1.svelte";
     import Line from "../Register/Line.svelte";
-    import { redirectToRegisterIfNotAuthenticated } from "../../../utils/auth.js";
+    import { redirectToRegisterIfNotAuthenticated } from "/src/utils/auth.js";
     import { onMount } from "svelte";
     import { redirect } from "@sveltejs/kit";
   

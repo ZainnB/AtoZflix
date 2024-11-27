@@ -1,5 +1,5 @@
 <script>
-    import { redirectToRegisterIfNotAuthenticated } from "../../../utils/auth.js";
+  import { redirectToRegisterIfNotAuthenticated } from "/src/utils/auth.js";
   import MovieCard from "../Slider/movie_card.svelte";
   import GenreSlider from "../GenralSlider/+page.svelte";
   import Navbar from "../Home/Navbar2.svelte";
