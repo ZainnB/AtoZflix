@@ -1466,21 +1466,21 @@ def get_all_ratings():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
     
-@app.route('/api/get_all_movies', methods=['GET'])
+@app.route('/api/get_users')
 def get_all_movies():
     conn = get_db_connection()
     cursor = conn.cursor()
-    try:
-        cursor.execute('SELECT movie_id,title,release_date,overview FROM Movies')
-        movies =[
-            {"movie_id": row[0], "title": row[1], "release_date": row[2],"overview":row[3]}
-            for row in cursor.fetchall()]
-        return jsonify({"movies": movies}), 200
-    except Exception as e:
-        print(e)
-        return jsonify({"error": "Failed to fetch movies"}), 500
-    finally:
-        conn.close()
+    cursor.execute('SELECT user_id, email, username, password role FROM Users')
+    users = [{'user_id':row[0],
+             'email':row[1],
+             'username':row[2],
+             'password':row[3]}
+               for row in cursor.fetchall()]
+    cursor.close()
+    conn.close()
+    return jsonify({"users": users})
+    
+
 
 @app.route('/api/get_movie_count', methods=['GET'])
 def get_movie_count():
