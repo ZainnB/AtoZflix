@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="__5dnELDgEe-TfPpbal2qDQ" name="Tier Architectures">
+  <packageImport xmi:type="uml:PackageImport" xmi:id="__52ooLDgEe-TfPpbal2qDQ">
+    <importedPackage xmi:type="uml:Model" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#_0"/>
+  </packageImport>
+  <packagedElement xmi:type="uml:Package" xmi:id="_QyeLkLDhEe-TfPpbal2qDQ" name="Presentation Tier">
+    <packagedElement xmi:type="uml:Package" xmi:id="_TYz7sLDhEe-TfPpbal2qDQ" name="Mobile App">
+      <packagedElement xmi:type="uml:Dependency" xmi:id="_yWGTQLDhEe-TfPpbal2qDQ" client="_TYz7sLDhEe-TfPpbal2qDQ" supplier="_ZzpRILDhEe-TfPpbal2qDQ"/>
+    </packagedElement>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Package" xmi:id="_VynEoLDhEe-TfPpbal2qDQ" name="Database Tier">
+    <packagedElement xmi:type="uml:Package" xmi:id="_qQgsMLDhEe-TfPpbal2qDQ" name="ChangeLog"/>
+    <packagedElement xmi:type="uml:Package" xmi:id="_Pf2QoLDiEe-TfPpbal2qDQ" name="Authentication"/>
+    <packagedElement xmi:type="uml:Package" xmi:id="_QG_wMLDiEe-TfPpbal2qDQ" name="User "/>
+    <packagedElement xmi:type="uml:Package" xmi:id="_QSRzILDiEe-TfPpbal2qDQ" name="Property"/>
+    <packagedElement xmi:type="uml:Package" xmi:id="_QbTMQLDiEe-TfPpbal2qDQ" name="Contractor"/>
+    <packagedElement xmi:type="uml:Package" xmi:id="_bkUvILDiEe-TfPpbal2qDQ" name="Appointment"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Package" xmi:id="_ZzpRILDhEe-TfPpbal2qDQ" name="Application Tier">
+    <packagedElement xmi:type="uml:Package" xmi:id="_dLBcoLDhEe-TfPpbal2qDQ" name="Authentication DAO">
+      <packagedElement xmi:type="uml:Dependency" xmi:id="_dlShULDiEe-TfPpbal2qDQ" client="_dLBcoLDhEe-TfPpbal2qDQ" supplier="_Pf2QoLDiEe-TfPpbal2qDQ"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Package" xmi:id="_dahRMLDhEe-TfPpbal2qDQ" name="User DAO">
+      <packagedElement xmi:type="uml:Dependency" xmi:id="_d_hmQLDiEe-TfPpbal2qDQ" client="_dahRMLDhEe-TfPpbal2qDQ" supplier="_QG_wMLDiEe-TfPpbal2qDQ"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Package" xmi:id="_dnGUoLDhEe-TfPpbal2qDQ" name="Property DAO">
+      <packagedElement xmi:type="uml:Dependency" xmi:id="_eSuPELDiEe-TfPpbal2qDQ" client="_dnGUoLDhEe-TfPpbal2qDQ" supplier="_QSRzILDiEe-TfPpbal2qDQ"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Package" xmi:id="_inOmoLDhEe-TfPpbal2qDQ" name="Contractor DAO">
+      <packagedElement xmi:type="uml:Dependency" xmi:id="_emMksLDiEe-TfPpbal2qDQ" client="_inOmoLDhEe-TfPpbal2qDQ" supplier="_QbTMQLDiEe-TfPpbal2qDQ"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Package" xmi:id="_ktuZELDhEe-TfPpbal2qDQ" name="Appointment DAO">
+      <packagedElement xmi:type="uml:Dependency" xmi:id="_e108ILDiEe-TfPpbal2qDQ" client="_ktuZELDhEe-TfPpbal2qDQ" supplier="_bkUvILDiEe-TfPpbal2qDQ"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Dependency" xmi:id="_gvYewLDiEe-TfPpbal2qDQ" client="_ZzpRILDhEe-TfPpbal2qDQ" supplier="_VynEoLDhEe-TfPpbal2qDQ"/>
+  </packagedElement>
+</uml:Model>

@@ -1466,6 +1466,84 @@ def get_all_ratings():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
     
+
+@app.route('/api/get_movieLogs', methods=['GET'])
+def get_movie_logs():
+    try:
+        # Connect to the database
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # SQL query to get all movie logs
+        query = "SELECT * FROM MovieLogs"
+        
+        # Execute the query
+        cursor.execute(query)
+        logs = cursor.fetchall()
+
+        # Check if logs are found
+        if logs:
+            # Convert logs to a list of dictionaries
+            logs_list = []
+            for row in logs:
+                logs_list.append({
+                    "log_id": row["log_id"],
+                    "admin_id": row["admin_id"],
+                    "action": row["action"],
+                    "details": row["details"],
+                    "created_at": row["created_at"]
+                })
+            
+            # Close the connection
+            conn.close()
+
+            return jsonify({"status": "success", "logs": logs_list}), 200
+        else:
+            return jsonify({"status": "success", "message": "No logs found"}), 404
+    
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    
+@app.route('/api/get_userLogs', methods=['GET'])
+def get_user_logs():
+    try:
+        # Connect to the database
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # SQL query to get all user logs
+        query = "SELECT * FROM UserLogs"
+        
+        # Execute the query
+        cursor.execute(query)
+        logs = cursor.fetchall()
+
+        # Check if logs are found
+        if logs:
+            # Convert logs to a list of dictionaries
+            logs_list = []
+            for row in logs:
+                logs_list.append({
+                    "log_id": row["log_id"],
+                    "admin_id": row["admin_id"],
+                    "user_id": row["user_id"],
+                    "action": row["action"],
+                    "old_data": row["old_data"],
+                    "new_data": row["new_data"],
+                    "created_at": row["created_at"]
+                })
+            
+            # Close the connection
+            conn.close()
+
+            return jsonify({"status": "success", "logs": logs_list}), 200
+        else:
+            return jsonify({"status": "success", "message": "No logs found"}), 404
+    
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
 @app.route('/api/get_users')
 def get_all_movies():
     conn = get_db_connection()

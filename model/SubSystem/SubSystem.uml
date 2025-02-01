@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_wuyOoLDKEe-yzJ0KNr63Cw" name="SubSystem">
+  <packageImport xmi:type="uml:PackageImport" xmi:id="_wvZSoLDKEe-yzJ0KNr63Cw">
+    <importedPackage xmi:type="uml:Model" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#_0"/>
+  </packageImport>
+  <packagedElement xmi:type="uml:Component" xmi:id="_5niYALDKEe-TfPpbal2qDQ" name="User Management">
+    <packagedElement xmi:type="uml:Component" xmi:id="_5HkpELDLEe-TfPpbal2qDQ" name="User Profile Management">
+      <packagedElement xmi:type="uml:Dependency" xmi:id="_Nu0SgLDPEe-TfPpbal2qDQ" client="_5HkpELDLEe-TfPpbal2qDQ" supplier="_cv2lkLDLEe-TfPpbal2qDQ"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Component" xmi:id="_Ci4s8LDMEe-TfPpbal2qDQ" name="Authentication Service">
+      <packagedElement xmi:type="uml:Dependency" xmi:id="_LTjxALDPEe-TfPpbal2qDQ" client="_Ci4s8LDMEe-TfPpbal2qDQ" supplier="_cfWrcLDLEe-TfPpbal2qDQ"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Dependency" xmi:id="_aW97QLDOEe-TfPpbal2qDQ" client="_5niYALDKEe-TfPpbal2qDQ" supplier="_6BMOILDKEe-TfPpbal2qDQ"/>
+    <packagedElement xmi:type="uml:Dependency" xmi:id="_is_yELDOEe-TfPpbal2qDQ" client="_5niYALDKEe-TfPpbal2qDQ" supplier="_K0sAgLDLEe-TfPpbal2qDQ"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Component" xmi:id="_52L4ALDKEe-TfPpbal2qDQ" name="Contractor Management">
+    <packagedElement xmi:type="uml:Component" xmi:id="_ZBkggLDMEe-TfPpbal2qDQ" name="Contractor Profile Management">
+      <packagedElement xmi:type="uml:Dependency" xmi:id="_oQEjoLDPEe-TfPpbal2qDQ" client="_ZBkggLDMEe-TfPpbal2qDQ" supplier="_5HkpELDLEe-TfPpbal2qDQ"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Component" xmi:id="_buidELDMEe-TfPpbal2qDQ" name="Hire Contractors"/>
+    <packagedElement xmi:type="uml:Component" xmi:id="_dOw5sLDMEe-TfPpbal2qDQ" name="Overall Rating Management"/>
+    <packagedElement xmi:type="uml:Dependency" xmi:id="_rl7hoLDOEe-TfPpbal2qDQ" client="_52L4ALDKEe-TfPpbal2qDQ" supplier="_K0sAgLDLEe-TfPpbal2qDQ"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Component" xmi:id="_6BMOILDKEe-TfPpbal2qDQ" name="Property Management">
+    <packagedElement xmi:type="uml:Component" xmi:id="_M0opkLDMEe-TfPpbal2qDQ" name="Property Management">
+      <packagedElement xmi:type="uml:Dependency" xmi:id="_XssQ4LDPEe-TfPpbal2qDQ" client="_M0opkLDMEe-TfPpbal2qDQ" supplier="_cv2lkLDLEe-TfPpbal2qDQ"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Component" xmi:id="_PaIFILDMEe-TfPpbal2qDQ" name="Property Comparison">
+      <packagedElement xmi:type="uml:Dependency" xmi:id="_cZZQkLDPEe-TfPpbal2qDQ" client="_PaIFILDMEe-TfPpbal2qDQ" supplier="_M0opkLDMEe-TfPpbal2qDQ"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Component" xmi:id="_Q1M8ALDMEe-TfPpbal2qDQ" name="Search &amp; Filter Properties"/>
+    <packagedElement xmi:type="uml:Component" xmi:id="_UspHoLDMEe-TfPpbal2qDQ" name="Add Favorites">
+      <packagedElement xmi:type="uml:Dependency" xmi:id="_p30kkLDPEe-TfPpbal2qDQ" client="_UspHoLDMEe-TfPpbal2qDQ" supplier="_M0opkLDMEe-TfPpbal2qDQ"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Component" xmi:id="_zmzSsLDMEe-TfPpbal2qDQ" name="Appointment Scheduling"/>
+    <packagedElement xmi:type="uml:Dependency" xmi:id="_nmpBkLDOEe-TfPpbal2qDQ" client="_6BMOILDKEe-TfPpbal2qDQ" supplier="_K0sAgLDLEe-TfPpbal2qDQ"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Component" xmi:id="_6Ln8gLDKEe-TfPpbal2qDQ" name="Review Management">
+    <packagedElement xmi:type="uml:Component" xmi:id="_hl9jcLDMEe-TfPpbal2qDQ" name="Review Collection Service">
+      <packagedElement xmi:type="uml:Dependency" xmi:id="_m7t_0LDPEe-TfPpbal2qDQ" client="_hl9jcLDMEe-TfPpbal2qDQ" supplier="_buidELDMEe-TfPpbal2qDQ"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Component" xmi:id="_lZvXELDMEe-TfPpbal2qDQ" name="Average Rating Calculation">
+      <packagedElement xmi:type="uml:Dependency" xmi:id="_eOa4gLDPEe-TfPpbal2qDQ" client="_lZvXELDMEe-TfPpbal2qDQ" supplier="_dOw5sLDMEe-TfPpbal2qDQ"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Dependency" xmi:id="_elGIkLDOEe-TfPpbal2qDQ" client="_6Ln8gLDKEe-TfPpbal2qDQ" supplier="_6BMOILDKEe-TfPpbal2qDQ"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Component" xmi:id="_8S5LALDKEe-TfPpbal2qDQ" name="Real Estate Management System">
+    <packagedElement xmi:type="uml:Component" xmi:id="_awrjILDLEe-TfPpbal2qDQ" name="Audit Logging">
+      <packagedElement xmi:type="uml:Component" xmi:id="_n9JvALDMEe-TfPpbal2qDQ" name="Insertion Opeeraion Audit"/>
+      <packagedElement xmi:type="uml:Component" xmi:id="_pjdlgLDMEe-TfPpbal2qDQ" name="Deletion Operation Audit"/>
+      <packagedElement xmi:type="uml:Dependency" xmi:id="_rxD-ILDPEe-TfPpbal2qDQ" client="_awrjILDLEe-TfPpbal2qDQ" supplier="_6Ln8gLDKEe-TfPpbal2qDQ"/>
+      <packagedElement xmi:type="uml:Dependency" xmi:id="_sXN_MLDPEe-TfPpbal2qDQ" client="_awrjILDLEe-TfPpbal2qDQ" supplier="_6BMOILDKEe-TfPpbal2qDQ"/>
+      <packagedElement xmi:type="uml:Dependency" xmi:id="_s5wrkLDPEe-TfPpbal2qDQ" client="_awrjILDLEe-TfPpbal2qDQ" supplier="_5niYALDKEe-TfPpbal2qDQ"/>
+      <packagedElement xmi:type="uml:Dependency" xmi:id="_vUwHULDPEe-TfPpbal2qDQ" client="_awrjILDLEe-TfPpbal2qDQ" supplier="_52L4ALDKEe-TfPpbal2qDQ"/>
+    </packagedElement>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Component" xmi:id="_K0sAgLDLEe-TfPpbal2qDQ" name="External Services">
+    <packagedElement xmi:type="uml:Component" xmi:id="_cfWrcLDLEe-TfPpbal2qDQ" name="Authentication Services"/>
+    <packagedElement xmi:type="uml:Component" xmi:id="_cv2lkLDLEe-TfPpbal2qDQ" name="Image Uploading Services"/>
+  </packagedElement>
+</uml:Model>

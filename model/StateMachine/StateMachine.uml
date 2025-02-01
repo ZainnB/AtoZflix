@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_A8LRALDQEe-TfPpbal2qDQ" name="StateMachine">
+  <packageImport xmi:type="uml:PackageImport" xmi:id="_A9QPELDQEe-TfPpbal2qDQ">
+    <importedPackage xmi:type="uml:Model" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#_0"/>
+  </packageImport>
+  <packagedElement xmi:type="uml:StateMachine" xmi:id="_A8VpELDQEe-TfPpbal2qDQ" name="StateMachine1">
+    <region xmi:type="uml:Region" xmi:id="_A8ahkLDQEe-TfPpbal2qDQ" name="Region1">
+      <transition xmi:type="uml:Transition" xmi:id="__KSN4LDVEe-TfPpbal2qDQ" source="_2bhuALDVEe-TfPpbal2qDQ" target="_3UjAsLDVEe-TfPpbal2qDQ"/>
+      <transition xmi:type="uml:Transition" xmi:id="__mdzkLDVEe-TfPpbal2qDQ" source="_3UjAsLDVEe-TfPpbal2qDQ" target="_32kIoLDVEe-TfPpbal2qDQ"/>
+      <transition xmi:type="uml:Transition" xmi:id="_GYfhALDWEe-TfPpbal2qDQ" source="_32kIoLDVEe-TfPpbal2qDQ" target="_EO6lZbDWEe-TfPpbal2qDQ"/>
+      <transition xmi:type="uml:Transition" xmi:id="_Us9FILDWEe-TfPpbal2qDQ" source="_3UjAsLDVEe-TfPpbal2qDQ" target="_SKFfwrDWEe-TfPpbal2qDQ"/>
+      <subvertex xmi:type="uml:State" xmi:id="_4YFosLDSEe-TfPpbal2qDQ" name="User State">
+        <region xmi:type="uml:Region" xmi:id="_E2CXILDTEe-TfPpbal2qDQ" name="Region1">
+          <transition xmi:type="uml:Transition" xmi:id="_H3aykLDVEe-TfPpbal2qDQ" source="_E2C-MLDTEe-TfPpbal2qDQ" target="_Guj_ALDTEe-TfPpbal2qDQ"/>
+          <transition xmi:type="uml:Transition" xmi:id="_OnOAgLDXEe-TfPpbal2qDQ" source="_Ggw2wLDXEe-TfPpbal2qDQ" target="_OFgakLDXEe-TfPpbal2qDQ"/>
+          <subvertex xmi:type="uml:Pseudostate" xmi:id="_E2C-MLDTEe-TfPpbal2qDQ" name="Initial"/>
+          <subvertex xmi:type="uml:State" xmi:id="_Guj_ALDTEe-TfPpbal2qDQ" name="Registration Process">
+            <region xmi:type="uml:Region" xmi:id="_LRewkLDTEe-TfPpbal2qDQ" name="Region1">
+              <transition xmi:type="uml:Transition" xmi:id="_iEPWsLDTEe-TfPpbal2qDQ" source="_LRfXpbDTEe-TfPpbal2qDQ" target="_VEQ5QLDTEe-TfPpbal2qDQ"/>
+              <transition xmi:type="uml:Transition" xmi:id="_jKaUkLDTEe-TfPpbal2qDQ" source="_VEQ5QLDTEe-TfPpbal2qDQ" target="_ROkaELDTEe-TfPpbal2qDQ"/>
+              <transition xmi:type="uml:Transition" xmi:id="_kZhzELDTEe-TfPpbal2qDQ" source="_ROkaELDTEe-TfPpbal2qDQ" target="_dYdkELDTEe-TfPpbal2qDQ"/>
+              <transition xmi:type="uml:Transition" xmi:id="_xAabELDTEe-TfPpbal2qDQ" source="_dYdkELDTEe-TfPpbal2qDQ" target="_tun6M7DTEe-TfPpbal2qDQ"/>
+              <subvertex xmi:type="uml:Pseudostate" xmi:id="_LRfXpbDTEe-TfPpbal2qDQ" name="Initial"/>
+              <subvertex xmi:type="uml:State" xmi:id="_ROkaELDTEe-TfPpbal2qDQ" name="Email Verification"/>
+              <subvertex xmi:type="uml:State" xmi:id="_VEQ5QLDTEe-TfPpbal2qDQ" name="Enter Email"/>
+              <subvertex xmi:type="uml:State" xmi:id="_dYdkELDTEe-TfPpbal2qDQ" name="Password Validation"/>
+            </region>
+          </subvertex>
+          <subvertex xmi:type="uml:State" xmi:id="_qvpnoLDTEe-TfPpbal2qDQ" name="Firebase Authentication">
+            <region xmi:type="uml:Region" xmi:id="_tunTILDTEe-TfPpbal2qDQ" name="Region1">
+              <transition xmi:type="uml:Transition" xmi:id="_Nf2v0LDXEe-TfPpbal2qDQ" source="_tun6M7DTEe-TfPpbal2qDQ" target="_Ggw2wLDXEe-TfPpbal2qDQ"/>
+              <subvertex xmi:type="uml:State" xmi:id="_tun6M7DTEe-TfPpbal2qDQ" name="Verified Credentials"/>
+            </region>
+          </subvertex>
+          <subvertex xmi:type="uml:State" xmi:id="_epAekLDWEe-TfPpbal2qDQ" name="Contractor Registration">
+            <region xmi:type="uml:Region" xmi:id="_iIL7MbDWEe-TfPpbal2qDQ" name="Region1">
+              <transition xmi:type="uml:Transition" xmi:id="_oElBILDWEe-TfPpbal2qDQ" source="_iINJULDWEe-TfPpbal2qDQ" target="_ma5GgLDWEe-TfPpbal2qDQ"/>
+              <transition xmi:type="uml:Transition" xmi:id="__5irILDWEe-TfPpbal2qDQ" source="_ma5GgLDWEe-TfPpbal2qDQ" target="_2rkfsLDWEe-TfPpbal2qDQ"/>
+              <transition xmi:type="uml:Transition" xmi:id="_M8CRELDXEe-TfPpbal2qDQ" source="_ma5GgLDWEe-TfPpbal2qDQ" target="_Ggw2wLDXEe-TfPpbal2qDQ"/>
+              <subvertex xmi:type="uml:State" xmi:id="_iINJULDWEe-TfPpbal2qDQ" name="Enter Contractor Credentials"/>
+              <subvertex xmi:type="uml:State" xmi:id="_ma5GgLDWEe-TfPpbal2qDQ" name="Verified Information"/>
+            </region>
+          </subvertex>
+          <subvertex xmi:type="uml:State" xmi:id="_Ggw2wLDXEe-TfPpbal2qDQ" name="Logout"/>
+          <subvertex xmi:type="uml:FinalState" xmi:id="_OFgakLDXEe-TfPpbal2qDQ" name="FinalState7"/>
+        </region>
+      </subvertex>
+      <subvertex xmi:type="uml:State" xmi:id="_8cFCkLDSEe-TfPpbal2qDQ" name="Property State">
+        <region xmi:type="uml:Region" xmi:id="_5PxCIrDTEe-TfPpbal2qDQ" name="Region1">
+          <transition xmi:type="uml:Transition" xmi:id="_hfXdILDVEe-TfPpbal2qDQ" source="_5PxpNrDTEe-TfPpbal2qDQ" target="_DClAALDUEe-TfPpbal2qDQ"/>
+          <subvertex xmi:type="uml:Pseudostate" xmi:id="_5PxpNrDTEe-TfPpbal2qDQ" name="Initial"/>
+          <subvertex xmi:type="uml:State" xmi:id="_DClAALDUEe-TfPpbal2qDQ" name="Property Sell">
+            <region xmi:type="uml:Region" xmi:id="_Fj0NsLDUEe-TfPpbal2qDQ" name="Region1">
+              <transition xmi:type="uml:Transition" xmi:id="_ymRJILDUEe-TfPpbal2qDQ" source="_Fj00wLDUEe-TfPpbal2qDQ" target="_RAcpFLDUEe-TfPpbal2qDQ"/>
+              <subvertex xmi:type="uml:Pseudostate" xmi:id="_Fj00wLDUEe-TfPpbal2qDQ" name="Initial"/>
+              <subvertex xmi:type="uml:State" xmi:id="_PDKdALDUEe-TfPpbal2qDQ" name="Property Creation">
+                <region xmi:type="uml:Region" xmi:id="_RAcCALDUEe-TfPpbal2qDQ" name="Region1">
+                  <transition xmi:type="uml:Transition" xmi:id="_x2WvILDUEe-TfPpbal2qDQ" source="_RAcpFLDUEe-TfPpbal2qDQ" target="_WyTS8LDUEe-TfPpbal2qDQ"/>
+                  <transition xmi:type="uml:Transition" xmi:id="_SbaD0LDXEe-TfPpbal2qDQ" source="_WyTS8LDUEe-TfPpbal2qDQ" target="_Ggw2wLDXEe-TfPpbal2qDQ"/>
+                  <subvertex xmi:type="uml:State" xmi:id="_RAcpFLDUEe-TfPpbal2qDQ" name="Enter Property Data"/>
+                  <subvertex xmi:type="uml:State" xmi:id="_WyTS8LDUEe-TfPpbal2qDQ" name="Create Listing"/>
+                </region>
+              </subvertex>
+              <subvertex xmi:type="uml:State" xmi:id="_dHhIkLDUEe-TfPpbal2qDQ" name="Status Change">
+                <region xmi:type="uml:Region" xmi:id="_egUukbDUEe-TfPpbal2qDQ" name="Region1">
+                  <transition xmi:type="uml:Transition" xmi:id="_S80HwLDXEe-TfPpbal2qDQ" source="_egVVpbDUEe-TfPpbal2qDQ" target="_Ggw2wLDXEe-TfPpbal2qDQ"/>
+                  <subvertex xmi:type="uml:State" xmi:id="_egVVpbDUEe-TfPpbal2qDQ" name="Mark as Sold"/>
+                </region>
+              </subvertex>
+            </region>
+          </subvertex>
+        </region>
+      </subvertex>
+      <subvertex xmi:type="uml:State" xmi:id="_gvwakLDUEe-TfPpbal2qDQ" name="AppointmentState">
+        <region xmi:type="uml:Region" xmi:id="_kzn4oLDUEe-TfPpbal2qDQ" name="Region1">
+          <transition xmi:type="uml:Transition" xmi:id="_G0OawLDWEe-TfPpbal2qDQ" name="Successful Sale" source="_C6jagLDWEe-TfPpbal2qDQ" target="_egVVpbDUEe-TfPpbal2qDQ"/>
+          <transition xmi:type="uml:Transition" xmi:id="_yXliALDWEe-TfPpbal2qDQ" source="_w0leMLDWEe-TfPpbal2qDQ" target="_2bhuALDVEe-TfPpbal2qDQ"/>
+          <subvertex xmi:type="uml:State" xmi:id="_zQ6zMLDVEe-TfPpbal2qDQ" name="Buy State">
+            <region xmi:type="uml:Region" xmi:id="_SKE4sLDWEe-TfPpbal2qDQ" name="Region1">
+              <transition xmi:type="uml:Transition" xmi:id="_WP-XELDWEe-TfPpbal2qDQ" source="_SKFfwrDWEe-TfPpbal2qDQ" target="_32kIoLDVEe-TfPpbal2qDQ"/>
+              <subvertex xmi:type="uml:State" xmi:id="_SKFfwrDWEe-TfPpbal2qDQ" name="Add to Favorites"/>
+            </region>
+          </subvertex>
+          <subvertex xmi:type="uml:State" xmi:id="_C6jagLDWEe-TfPpbal2qDQ" name="Pending Appointments">
+            <region xmi:type="uml:Region" xmi:id="_EO5XQrDWEe-TfPpbal2qDQ" name="Region1">
+              <transition xmi:type="uml:Transition" xmi:id="_NgEAoLDWEe-TfPpbal2qDQ" source="_EO6lZbDWEe-TfPpbal2qDQ" target="_LRJSALDWEe-TfPpbal2qDQ"/>
+              <transition xmi:type="uml:Transition" xmi:id="_UsHiMLDXEe-TfPpbal2qDQ" source="_LRJSALDWEe-TfPpbal2qDQ" target="_Ggw2wLDXEe-TfPpbal2qDQ"/>
+              <subvertex xmi:type="uml:State" xmi:id="_EO6lZbDWEe-TfPpbal2qDQ" name="Appointments Scheduled"/>
+              <subvertex xmi:type="uml:State" xmi:id="_LRJSALDWEe-TfPpbal2qDQ" name="Appointment Deleted"/>
+            </region>
+          </subvertex>
+          <subvertex xmi:type="uml:Pseudostate" xmi:id="_w0leMLDWEe-TfPpbal2qDQ" name="Initial"/>
+        </region>
+      </subvertex>
+      <subvertex xmi:type="uml:State" xmi:id="_2bhuALDVEe-TfPpbal2qDQ" name="Look for Buy Properties"/>
+      <subvertex xmi:type="uml:State" xmi:id="_3UjAsLDVEe-TfPpbal2qDQ" name="See Property Details"/>
+      <subvertex xmi:type="uml:State" xmi:id="_32kIoLDVEe-TfPpbal2qDQ" name="Schedule an Appointment"/>
+      <subvertex xmi:type="uml:State" xmi:id="_slCUkLDWEe-TfPpbal2qDQ" name="Review State">
+        <region xmi:type="uml:Region" xmi:id="_zSMJELDWEe-TfPpbal2qDQ" name="Region1">
+          <subvertex xmi:type="uml:State" xmi:id="_zSNXMLDWEe-TfPpbal2qDQ" name="Hiring Contractor">
+            <region xmi:type="uml:Region" xmi:id="_2rjRkrDWEe-TfPpbal2qDQ" name="Region1">
+              <transition xmi:type="uml:Transition" xmi:id="_AhW5ELDXEe-TfPpbal2qDQ" source="_2rkfsLDWEe-TfPpbal2qDQ" target="_5EvWgLDWEe-TfPpbal2qDQ"/>
+              <transition xmi:type="uml:Transition" xmi:id="_UEuyELDXEe-TfPpbal2qDQ" source="_5EvWgLDWEe-TfPpbal2qDQ" target="_Ggw2wLDXEe-TfPpbal2qDQ"/>
+              <subvertex xmi:type="uml:State" xmi:id="_2rkfsLDWEe-TfPpbal2qDQ" name="Hiring Contractor"/>
+              <subvertex xmi:type="uml:State" xmi:id="_5EvWgLDWEe-TfPpbal2qDQ" name="Provide Rating Upon Completion"/>
+            </region>
+          </subvertex>
+          <subvertex xmi:type="uml:Pseudostate" xmi:id="_055GsLDWEe-TfPpbal2qDQ" name="Initial2"/>
+        </region>
+      </subvertex>
+    </region>
+  </packagedElement>
+  <profileApplication xmi:type="uml:ProfileApplication" xmi:id="_6VOq0LDSEe-TfPpbal2qDQ">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_6VQgALDSEe-TfPpbal2qDQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+      <references xmi:type="ecore:EPackage" href="pathmap://PAPYRUS_ACTIONLANGUAGE_PROFILE/ActionLanguage-Profile.profile.uml#_Kv8EIKFXEeS_KNX0nfvIVQ"/>
+    </eAnnotations>
+    <appliedProfile xmi:type="uml:Profile" href="pathmap://PAPYRUS_ACTIONLANGUAGE_PROFILE/ActionLanguage-Profile.profile.uml#ActionLanguage"/>
+  </profileApplication>
+</uml:Model>

@@ -6,7 +6,7 @@
   const BASE_URL = "http://localhost:5000/api";
 
   // Admin actions form data
-  let user_id = "";
+  let admin_id = "";
   let movie_id = "";
   let year_start = 2024;
   let year_end = 2024;
@@ -24,8 +24,8 @@
   // Fetch Admin ID from localStorage
   onMount(() => {
     const user = JSON.parse(localStorage.getItem("user"));
-    user_id = user?.userId || "";
-    if (!user_id) {
+    admin_id = user?.userId || "";
+    if (!admin_id) {
       console.log("No user ID found in localStorage");
     }
   });
@@ -46,11 +46,11 @@
   };
 
   // Admin panel actions
-  const addSingleMovie = () => callApi("add_single_movie", "POST", { user_id, movie_id });
-  const updateSingleMovie = () => callApi("update_single_movie", "PUT", { user_id, movie_id });
-  const deleteSingleMovie = () => callApi("delete_single_movie", "DELETE", { user_id, movie_id });
-  const addBatchMovies = () => callApi("add_batch_movies", "POST", { user_id, year_start, year_end, page_start, page_end });
-  const updateBatchMovies = () => callApi("update_batch_movies", "PUT", { user_id, year_start, year_end, page_start, page_end });
+  const addSingleMovie = () => callApi("add_single_movie", "POST", { admin_id, movie_id });
+  const updateSingleMovie = () => callApi("update_single_movie", "PUT", { admin_id, movie_id });
+  const deleteSingleMovie = () => callApi("delete_single_movie", "DELETE", { admin_id, movie_id });
+  const addBatchMovies = () => callApi("add_batch_movies", "POST", { admin_id, year_start, year_end, page_start, page_end });
+  const updateBatchMovies = () => callApi("update_batch_movies", "PUT", { admin_id, year_start, year_end, page_start, page_end });
 
   // Search functionality
   const searchMovies = async () => {
@@ -69,6 +69,70 @@
     }
   };
 </script>
+
+<main>
+  <!-- Back Button -->
+<div class="back-button">
+  <button on:click={() => window.history.back()}>Back</button>
+</div>
+
+  <!-- Search Bar -->
+  <div class="search-bar">
+    <h1>Search Movies</h1>
+    <input type="text" placeholder="Search Query" bind:value={query} />
+    <button on:click={searchMovies}>Search</button>
+  </div>
+
+  <!-- Movie Grid -->
+  {#if searchError}
+    <p class="error">{searchError}</p>
+  {:else if movies.length === 0 && query}
+    <p class="response">No results found.</p>
+  {:else}
+    <div class="movies-grid">
+      {#each movies as { poster_path, movie_id }}
+        <div>
+          <MovieCard poster_path={poster_path} movie_id={movie_id} />
+          <p class="movie-id">Movie ID: {movie_id}</p>
+        </div>
+      {/each}
+    </div>
+  {/if}
+
+  <!-- Single Movie Actions -->
+  <section>
+    <h2>Single Movie Actions</h2>
+    <input type="text" placeholder="Movie ID" bind:value={movie_id} />
+    <button on:click={addSingleMovie}>Add Single Movie</button>
+    <button on:click={updateSingleMovie}>Update Single Movie</button>
+    <button on:click={deleteSingleMovie}>Delete Single Movie</button>
+  </section>
+
+  <!-- Batch Movie Actions -->
+  <div class="batch-actions">
+    <button on:click={() => (batchFormVisible = !batchFormVisible)}>
+      {batchFormVisible ? "Hide Batch Actions" : "Show Batch Actions"}
+    </button>
+
+    {#if batchFormVisible}
+      <div class="batch-form">
+        <input type="number" placeholder="Year Start" bind:value={year_start} />
+        <input type="number" placeholder="Year End" bind:value={year_end} />
+        <input type="number" placeholder="Page Start" bind:value={page_start} />
+        <input type="number" placeholder="Page End" bind:value={page_end} />
+        <button on:click={addBatchMovies}>Add Batch Movies</button>
+        <button on:click={updateBatchMovies}>Update Batch Movies</button>
+      </div>
+    {/if}
+  </div>
+
+  <!-- Response Message -->
+  <div class="response">
+    <h3>Admin Response:</h3>
+    <p>{$responseMessage}</p>
+  </div>
+</main>
+
 
 <style>
   main {
@@ -162,66 +226,3 @@
 }
 
 </style>
-
-<main>
-  <!-- Back Button -->
-<div class="back-button">
-  <button on:click={() => window.history.back()}>Back</button>
-</div>
-
-  <!-- Search Bar -->
-  <div class="search-bar">
-    <h1>Search Movies</h1>
-    <input type="text" placeholder="Search Query" bind:value={query} />
-    <button on:click={searchMovies}>Search</button>
-  </div>
-
-  <!-- Movie Grid -->
-  {#if searchError}
-    <p class="error">{searchError}</p>
-  {:else if movies.length === 0 && query}
-    <p class="response">No results found.</p>
-  {:else}
-    <div class="movies-grid">
-      {#each movies as { poster_path, movie_id }}
-        <div>
-          <MovieCard poster_path={poster_path} movie_id={movie_id} />
-          <p class="movie-id">Movie ID: {movie_id}</p>
-        </div>
-      {/each}
-    </div>
-  {/if}
-
-  <!-- Single Movie Actions -->
-  <section>
-    <h2>Single Movie Actions</h2>
-    <input type="text" placeholder="Movie ID" bind:value={movie_id} />
-    <button on:click={addSingleMovie}>Add Single Movie</button>
-    <button on:click={updateSingleMovie}>Update Single Movie</button>
-    <button on:click={deleteSingleMovie}>Delete Single Movie</button>
-  </section>
-
-  <!-- Batch Movie Actions -->
-  <div class="batch-actions">
-    <button on:click={() => (batchFormVisible = !batchFormVisible)}>
-      {batchFormVisible ? "Hide Batch Actions" : "Show Batch Actions"}
-    </button>
-
-    {#if batchFormVisible}
-      <div class="batch-form">
-        <input type="number" placeholder="Year Start" bind:value={year_start} />
-        <input type="number" placeholder="Year End" bind:value={year_end} />
-        <input type="number" placeholder="Page Start" bind:value={page_start} />
-        <input type="number" placeholder="Page End" bind:value={page_end} />
-        <button on:click={addBatchMovies}>Add Batch Movies</button>
-        <button on:click={updateBatchMovies}>Update Batch Movies</button>
-      </div>
-    {/if}
-  </div>
-
-  <!-- Response Message -->
-  <div class="response">
-    <h3>Admin Response:</h3>
-    <p>{$responseMessage}</p>
-  </div>
-</main>
