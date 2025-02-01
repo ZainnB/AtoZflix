@@ -1,7 +1,5 @@
 from flask import Flask, jsonify
 import sqlite3
-import time
-import requests
 
 app = Flask(__name__)
 
