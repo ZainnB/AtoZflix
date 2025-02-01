@@ -116,9 +116,14 @@
 
     {#if batchFormVisible}
       <div class="batch-form">
+        <h2>Batch Movie Actions</h2>
+        <p>Start Year:</p>
         <input type="number" placeholder="Year Start" bind:value={year_start} />
+        <p>End Year:</p>
         <input type="number" placeholder="Year End" bind:value={year_end} />
+        <p>Start Page:</p>
         <input type="number" placeholder="Page Start" bind:value={page_start} />
+        <p>End Page:</p>
         <input type="number" placeholder="Page End" bind:value={page_end} />
         <button on:click={addBatchMovies}>Add Batch Movies</button>
         <button on:click={updateBatchMovies}>Update Batch Movies</button>
@@ -200,6 +205,7 @@
   .batch-form {
     display: flex;
     flex-direction: column;
+    justify-content: center;
     align-items: center;
     margin-top: 10px;
     background-color: #1e1e1e;
