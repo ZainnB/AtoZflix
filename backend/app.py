@@ -16,11 +16,13 @@ def get_db_connection():
     return conn
 
 # Function to validate email format
+# in validators.py
 def is_valid_email(email):
     pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
     return re.match(pattern, email)
 
 # Registration POST API logic
+# in user_routes.py
 @app.route('/api/register', methods=['POST'])
 def register():
     data = request.json
@@ -57,6 +59,7 @@ def register():
     except Exception as e:
         return jsonify({"message": f"An error occurred: {str(e)}"}), 500
 
+# in user_routes.py
 @app.route('/api/signin', methods=['POST'])
 def signin():
     print("Headers:", request.headers)
@@ -99,6 +102,7 @@ def signin():
     else:
         return jsonify({"success": False, "message": "Invalid username or password"}), 401
 
+# in movie_routes.py
 def calculate_trending(limit):
     conn = sqlite3.connect('movies.db')
     cursor = conn.cursor()
@@ -183,7 +187,8 @@ def get_trending_movies():
 #     except Exception as e:
 #         print(f"Error fetching latest movies: {e}")
 #         return jsonify({"error": "Failed to fetch latest movies"}), 500
-    
+
+# in movie_routes.py    
 @app.route("/api/latest", methods=["GET"])
 def latest_movies():
     limit = request.args.get("limit", default=80, type=int)  # Default to 80 movies per page
@@ -212,6 +217,7 @@ def latest_movies():
         print(f"Error fetching latest movies: {e}")
         return jsonify({"error": "Failed to fetch latest movies"}), 500
 
+# in movie_routes.py
 @app.route("/api/top_rated", methods=["GET"])
 def top_rated_movies():
     limit = request.args.get("limit", default=10, type=int)
@@ -240,7 +246,8 @@ def top_rated_movies():
     except Exception as e:
         print(f"Error fetching top rated movies: {e}")
         return jsonify({"error": "Failed to fetch top rated movies"}), 500
-    
+
+# in genre_routes.py   
 @app.route('/api/get_genre_names')
 def get_all_genre():
     conn = get_db_connection()
@@ -261,7 +268,7 @@ def get_all_genre():
         cursor.close()
         conn.close()
 
-
+# in genre_routes.py
 @app.route("/api/genre", methods=["GET"])
 def genre_movies():
     genre = request.args.get("genre", type=str)
@@ -304,7 +311,7 @@ def genre_movies():
     else:
         return jsonify({"error": "Genre not found"}), 404
 
-
+# in country_routes.py
 @app.route("/api/get_country_names", methods=["GET"])
 def get_all_countries():
     conn = sqlite3.connect('movies.db')
@@ -322,6 +329,7 @@ def get_all_countries():
         cursor.close()
         conn.close()
 
+# in country_routes.py
 @app.route("/api/country", methods=["GET"])
 def country_movies():
     country = request.args.get("country", type=str)
@@ -352,6 +360,7 @@ def country_movies():
         print(f"Error fetching country movies: {e}")
         return jsonify({"error": "Failed to fetch country movies"}), 500
 
+# in movie_routes.py
 @app.route("/api/search_movie", methods=["GET"])
 def search_movies():
     # Extract parameters from the request
@@ -389,7 +398,8 @@ def search_movies():
         conn.close()
         print(f"Error fetching search movies: {e}")
         return jsonify({"error": "Failed to fetch search movies"}), 500
-    
+
+# in actor_routes.py 
 @app.route("/api/search_actor", methods=["GET"])
 def search_actors():
     # Extract parameters from the request
@@ -454,7 +464,7 @@ def search_actors():
         print(f"Error fetching actor movies: {e}")
         return jsonify({"error": "Failed to fetch actor movies"}), 500
 
-
+# in crew_routes.py
 @app.route("/api/search_crew", methods=["GET"])
 def search_crew():
     # Extract parameters from the request
@@ -529,7 +539,7 @@ def search_crew():
         print(f"Error fetching crew movies: {e}")
         return jsonify({"error": "Failed to fetch crew movies"}), 500
 
-
+# in actor_routes.py
 @app.route('/api/top-actors', methods=['GET'])
 def get_top_actors():
     try:
@@ -576,6 +586,7 @@ def get_top_actors():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+# in actor_routes.py
 @app.route('/api/actor-movies', methods=['GET'])
 def get_actor_movies():
     try:
@@ -621,7 +632,7 @@ def get_actor_movies():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-
+# in crew_routes.py
 @app.route('/api/top-crew', methods=['GET'])
 def get_top_crew():
     try:
@@ -665,7 +676,7 @@ def get_top_crew():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-
+# in crew_routes.py
 @app.route('/api/crew-movies', methods=['GET'])
 def get_crew_movies():
     try:
@@ -709,6 +720,7 @@ def get_crew_movies():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+# in movie_routes.py
 @app.route("/api/movie_details", methods=["GET"])
 def movie_details():
     movie_id = request.args.get("movie_id", type=int)
@@ -752,7 +764,7 @@ def movie_details():
         print(f"Error fetching movie details: {e}")
         return jsonify({"error": "Failed to fetch movie details"}), 500
 
-
+# in rating_routes.py
 @app.route('/api/rate_movie', methods=['POST'])
 def rate_movie():
     try:
@@ -778,6 +790,7 @@ def rate_movie():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 # Favorites API Endpoints
+# in favorites_routes.py
 @app.route('/api/get_favourites', methods=['GET'])
 def get_favourites():
     user_id = request.args.get('user_id')
@@ -816,6 +829,7 @@ def get_favourites():
     finally:
         conn.close()
 
+# in favorites_routes.py
 @app.route('/api/add_favourite', methods=['POST'])
 def add_to_favorites():
     try:
@@ -857,7 +871,7 @@ def add_to_favorites():
         app.logger.error(f"Error: {str(e)}")
         return jsonify({"success": False, "message": str(e)}), 500
  
-
+# in favorites_routes.py
 @app.route('/api/remove_favourite', methods=['POST'])
 def remove_from_favorites():
     try:
@@ -880,7 +894,8 @@ def remove_from_favorites():
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
-    
+
+# in favorites_routes.py    
 @app.route('/api/check_favourite', methods=['GET'])
 def check_favorite():
     try:
@@ -907,6 +922,7 @@ def check_favorite():
 
 
 # Watchlist/WatchLater API Endpoints
+# in watchlist_routes.py
 @app.route('/api/get_watchlist', methods=['GET'])
 def get_watchlist():
     user_id = request.args.get('user_id')
@@ -943,7 +959,7 @@ def get_watchlist():
     finally:
         conn.close()
 
-
+# in watchlist_routes.py
 @app.route('/api/add_to_watchlist', methods=['POST'])
 def add_to_watchlist():
     data = request.get_json()
@@ -970,6 +986,7 @@ def add_to_watchlist():
     finally:
         conn.close()
 
+# in watchlist_routes.py
 @app.route('/api/remove_from_watchlist', methods=['POST'])
 def remove_from_watchlist():
     data = request.get_json()
@@ -997,6 +1014,7 @@ def remove_from_watchlist():
     finally:
         conn.close()
 
+# in watchlist_routes.py
 @app.route('/api/check_watchlist', methods=['GET'])
 def check_watchlist():
     user_id = request.args.get('user_id')
@@ -1201,7 +1219,7 @@ def update_batch_movies():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
+# from here to movie_exists function in tmdb_importer.py
 def fetch_with_retry(url, params, retries=3, backoff_factor=1):
     for attempt in range(retries):
         try:
